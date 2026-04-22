@@ -36,150 +36,229 @@
 </head>
 <body class="bg-gray-50 text-gray-900 antialiased h-screen overflow-hidden flex flex-col">
 
-  <!-- ── API Key Header ─────────────────────────────────────────────────── -->
-  <header class="flex-shrink-0 bg-white border-b border-gray-200 px-4 py-2.5 flex items-center gap-3">
-    <span class="text-sm font-semibold text-gray-700 whitespace-nowrap">Story Generator</span>
-    <div class="w-px h-4 bg-gray-200"></div>
-    <label class="text-xs font-medium text-gray-500 whitespace-nowrap">Anthropic API Key</label>
-    <input
-      type="password"
-      id="api-key"
-      placeholder="sk-ant-api03-..."
-      class="flex-1 max-w-xs border border-gray-200 rounded-lg px-3 py-1.5 text-xs font-mono text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent"
-    />
-    <span class="text-xs text-gray-400 hidden sm:block">Wird nur lokal verwendet – nicht gespeichert, nicht übertragen</span>
-  </header>
-
-  <!-- ── 3-Panel Layout ─────────────────────────────────────────────────── -->
-  <main class="flex-1 grid overflow-hidden" style="grid-template-columns: 280px 1fr 320px;">
-
-    <!-- Left: Input Panel -->
-    <aside class="border-r border-gray-200 bg-white overflow-y-auto flex flex-col">
-      <div class="p-4 flex flex-col gap-5 flex-1">
-
-        <!-- Generate section -->
-        <section>
-          <h2 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Anforderung</h2>
-          <textarea
-            id="raw-input"
-            rows="9"
-            placeholder="Beschreibe die Anforderung in deinen eigenen Worten — Slack-Nachricht, Sticky Note, spontane Idee…"
-            class="w-full resize-none border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent leading-relaxed"
-          ></textarea>
-          <button
-            id="generate-btn"
-            onclick="handleGenerate()"
-            class="mt-3 w-full bg-indigo-500 hover:bg-indigo-600 text-white font-medium py-2.5 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm"
-          >
-            Story generieren
-          </button>
-        </section>
-
-        <!-- Refine section – hidden until first story is generated -->
-        <section id="refine-section" class="hidden border-t border-gray-100 pt-4">
-          <h2 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Refinement-Anweisung</h2>
-          <textarea
-            id="refinement-input"
-            rows="4"
-            placeholder='z.B. "Mach AK-2 spezifischer" oder "Berücksichtige den Offline-Fall"'
-            class="w-full resize-none border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent leading-relaxed"
-          ></textarea>
-          <button
-            id="refine-btn"
-            onclick="handleRefine()"
-            class="mt-3 w-full bg-white border border-indigo-500 text-indigo-600 hover:bg-indigo-50 font-medium py-2.5 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm"
-          >
-            Story verfeinern
-          </button>
-        </section>
-
+  <!-- ── Login Screen ───────────────────────────────────────────────────── -->
+  <div id="login-screen" class="fixed inset-0 z-50 bg-gray-50 flex items-center justify-center p-4">
+    <div class="w-full max-w-sm">
+      <div class="text-center mb-8">
+        <h1 class="text-2xl font-bold text-gray-900">Story Generator</h1>
+        <p class="text-sm text-gray-500 mt-1">Anforderungen in Stories verwandeln</p>
       </div>
-    </aside>
-
-    <!-- Center: Story Output Panel -->
-    <section class="bg-white overflow-y-auto flex flex-col">
-      <div class="flex-shrink-0 flex items-center justify-between px-4 py-3 border-b border-gray-100">
-        <h2 class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Story</h2>
-        <button
-          id="copy-btn"
-          onclick="handleCopy()"
-          class="hidden items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
-        >
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
-          </svg>
-          <span id="copy-label">Kopieren</span>
-        </button>
-      </div>
-
-      <div id="story-output" class="flex-1 px-6 py-5">
-        <!-- Empty state -->
-        <div id="story-empty" class="flex flex-col items-center justify-center h-full min-h-48 text-center">
-          <div class="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mb-4">
-            <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-            </svg>
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+        <h2 class="text-lg font-semibold text-gray-900 mb-5">Anmelden</h2>
+        <form onsubmit="handleLogin(event)" class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">E-Mail</label>
+            <input
+              type="email"
+              id="login-email"
+              required
+              placeholder="name@beispiel.de"
+              class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+            />
           </div>
-          <p class="text-sm text-gray-500">Gib eine Anforderung ein und klicke auf „Story generieren".</p>
-        </div>
-
-        <!-- Skeleton loader -->
-        <div id="story-skeleton" class="hidden space-y-3">
-          <div class="skeleton h-5 bg-gray-200 rounded w-2/3"></div>
-          <div class="skeleton h-3 bg-gray-100 rounded w-full"></div>
-          <div class="skeleton h-3 bg-gray-100 rounded w-5/6"></div>
-          <div class="skeleton h-3 bg-gray-100 rounded w-4/6"></div>
-          <div class="skeleton h-5 bg-gray-200 rounded w-1/2 mt-5"></div>
-          <div class="skeleton h-3 bg-gray-100 rounded w-full"></div>
-          <div class="skeleton h-3 bg-gray-100 rounded w-full"></div>
-          <div class="skeleton h-3 bg-gray-100 rounded w-3/4"></div>
-          <div class="skeleton h-5 bg-gray-200 rounded w-1/3 mt-5"></div>
-          <div class="skeleton h-3 bg-gray-100 rounded w-full"></div>
-          <div class="skeleton h-3 bg-gray-100 rounded w-5/6"></div>
-        </div>
-
-        <!-- Rendered story -->
-        <div id="story-content" class="hidden prose text-sm text-gray-800 max-w-none"></div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Passwort</label>
+            <input
+              type="password"
+              id="login-password"
+              required
+              placeholder="••••••••"
+              class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+            />
+          </div>
+          <div id="login-error" class="hidden text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+            E-Mail oder Passwort falsch.
+          </div>
+          <button
+            type="submit"
+            class="w-full bg-indigo-500 hover:bg-indigo-600 text-white font-medium py-2 rounded-lg transition-colors"
+          >
+            Anmelden
+          </button>
+        </form>
       </div>
-    </section>
+    </div>
+  </div>
 
-    <!-- Right: Insights Panel -->
-    <aside class="border-l border-gray-200 bg-amber-50 overflow-y-auto flex flex-col">
-      <div class="flex-shrink-0 px-4 py-3 border-b border-amber-100">
-        <h2 class="text-xs font-semibold text-amber-700 uppercase tracking-wider">Refinement Hinweise</h2>
-      </div>
+  <!-- ── App (hidden until login) ──────────────────────────────────────── -->
+  <div id="app" class="hidden flex-col h-screen overflow-hidden">
 
-      <div id="insights-output" class="flex-1 px-4 py-4">
-        <!-- Empty state -->
-        <div id="insights-empty">
-          <p class="text-xs text-center py-8" style="color: rgba(180,120,20,0.5);">
-            KI-Hinweise erscheinen hier nach der Generierung.
-          </p>
+    <!-- API Key Header -->
+    <header class="flex-shrink-0 bg-white border-b border-gray-200 px-4 py-2.5 flex items-center gap-3">
+      <span class="text-sm font-semibold text-gray-700 whitespace-nowrap">Story Generator</span>
+      <div class="w-px h-4 bg-gray-200"></div>
+      <label class="text-xs font-medium text-gray-500 whitespace-nowrap">Anthropic API Key</label>
+      <input
+        type="password"
+        id="api-key"
+        placeholder="sk-ant-api03-..."
+        class="flex-1 max-w-xs border border-gray-200 rounded-lg px-3 py-1.5 text-xs font-mono text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent"
+      />
+      <span class="text-xs text-gray-400 hidden sm:block">Wird nur lokal verwendet – nicht gespeichert, nicht übertragen</span>
+      <button
+        onclick="handleLogout()"
+        class="ml-auto text-xs text-gray-400 hover:text-gray-600 transition-colors whitespace-nowrap"
+      >
+        Abmelden
+      </button>
+    </header>
+
+    <!-- 3-Panel Layout -->
+    <main class="flex-1 grid overflow-hidden" style="grid-template-columns: 280px 1fr 320px;">
+
+      <!-- Left: Input Panel -->
+      <aside class="border-r border-gray-200 bg-white overflow-y-auto flex flex-col">
+        <div class="p-4 flex flex-col gap-5 flex-1">
+          <section>
+            <h2 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Anforderung</h2>
+            <textarea
+              id="raw-input"
+              rows="9"
+              placeholder="Beschreibe die Anforderung in deinen eigenen Worten — Slack-Nachricht, Sticky Note, spontane Idee…"
+              class="w-full resize-none border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent leading-relaxed"
+            ></textarea>
+            <button
+              id="generate-btn"
+              onclick="handleGenerate()"
+              class="mt-3 w-full bg-indigo-500 hover:bg-indigo-600 text-white font-medium py-2.5 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm"
+            >
+              Story generieren
+            </button>
+          </section>
+
+          <section id="refine-section" class="hidden border-t border-gray-100 pt-4">
+            <h2 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Refinement-Anweisung</h2>
+            <textarea
+              id="refinement-input"
+              rows="4"
+              placeholder='z.B. "Mach AK-2 spezifischer" oder "Berücksichtige den Offline-Fall"'
+              class="w-full resize-none border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent leading-relaxed"
+            ></textarea>
+            <button
+              id="refine-btn"
+              onclick="handleRefine()"
+              class="mt-3 w-full bg-white border border-indigo-500 text-indigo-600 hover:bg-indigo-50 font-medium py-2.5 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm"
+            >
+              Story verfeinern
+            </button>
+          </section>
         </div>
+      </aside>
 
-        <!-- Skeleton -->
-        <div id="insights-skeleton" class="hidden space-y-2">
-          <div class="skeleton h-3 bg-amber-100 rounded w-full"></div>
-          <div class="skeleton h-3 bg-amber-100 rounded w-5/6"></div>
-          <div class="skeleton h-3 bg-amber-100 rounded w-4/6"></div>
-          <div class="skeleton h-3 bg-amber-100 rounded w-full mt-3"></div>
-          <div class="skeleton h-3 bg-amber-100 rounded w-3/4"></div>
+      <!-- Center: Story Output Panel -->
+      <section class="bg-white overflow-y-auto flex flex-col">
+        <div class="flex-shrink-0 flex items-center justify-between px-4 py-3 border-b border-gray-100">
+          <h2 class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Story</h2>
+          <button
+            id="copy-btn"
+            onclick="handleCopy()"
+            class="hidden items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+          >
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+            </svg>
+            <span id="copy-label">Kopieren</span>
+          </button>
         </div>
+        <div id="story-output" class="flex-1 px-6 py-5">
+          <div id="story-empty" class="flex flex-col items-center justify-center h-full min-h-48 text-center">
+            <div class="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mb-4">
+              <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+              </svg>
+            </div>
+            <p class="text-sm text-gray-500">Gib eine Anforderung ein und klicke auf „Story generieren".</p>
+          </div>
+          <div id="story-skeleton" class="hidden space-y-3">
+            <div class="skeleton h-5 bg-gray-200 rounded w-2/3"></div>
+            <div class="skeleton h-3 bg-gray-100 rounded w-full"></div>
+            <div class="skeleton h-3 bg-gray-100 rounded w-5/6"></div>
+            <div class="skeleton h-3 bg-gray-100 rounded w-4/6"></div>
+            <div class="skeleton h-5 bg-gray-200 rounded w-1/2 mt-5"></div>
+            <div class="skeleton h-3 bg-gray-100 rounded w-full"></div>
+            <div class="skeleton h-3 bg-gray-100 rounded w-full"></div>
+            <div class="skeleton h-3 bg-gray-100 rounded w-3/4"></div>
+            <div class="skeleton h-5 bg-gray-200 rounded w-1/3 mt-5"></div>
+            <div class="skeleton h-3 bg-gray-100 rounded w-full"></div>
+            <div class="skeleton h-3 bg-gray-100 rounded w-5/6"></div>
+          </div>
+          <div id="story-content" class="hidden prose text-sm text-gray-800 max-w-none"></div>
+        </div>
+      </section>
 
-        <!-- Rendered hints -->
-        <div id="insights-content" class="hidden prose text-xs text-amber-900 max-w-none"></div>
-      </div>
-    </aside>
+      <!-- Right: Insights Panel -->
+      <aside class="border-l border-gray-200 bg-amber-50 overflow-y-auto flex flex-col">
+        <div class="flex-shrink-0 px-4 py-3 border-b border-amber-100">
+          <h2 class="text-xs font-semibold text-amber-700 uppercase tracking-wider">Refinement Hinweise</h2>
+        </div>
+        <div id="insights-output" class="flex-1 px-4 py-4">
+          <div id="insights-empty">
+            <p class="text-xs text-center py-8" style="color: rgba(180,120,20,0.5);">
+              KI-Hinweise erscheinen hier nach der Generierung.
+            </p>
+          </div>
+          <div id="insights-skeleton" class="hidden space-y-2">
+            <div class="skeleton h-3 bg-amber-100 rounded w-full"></div>
+            <div class="skeleton h-3 bg-amber-100 rounded w-5/6"></div>
+            <div class="skeleton h-3 bg-amber-100 rounded w-4/6"></div>
+            <div class="skeleton h-3 bg-amber-100 rounded w-full mt-3"></div>
+            <div class="skeleton h-3 bg-amber-100 rounded w-3/4"></div>
+          </div>
+          <div id="insights-content" class="hidden prose text-xs text-amber-900 max-w-none"></div>
+        </div>
+      </aside>
 
-  </main>
+    </main>
+  </div>
 
   <!-- ── JavaScript ─────────────────────────────────────────────────────── -->
   <script>
+    // ── Auth ───────────────────────────────────────────────────────────────
+    const ALLOWED_EMAIL    = 'lars_joss@bluewin.ch';
+    const ALLOWED_PASSWORD = 'Test1234';
+    const SESSION_KEY      = 'sg_auth';
+
+    function handleLogin(e) {
+      e.preventDefault();
+      const email    = document.getElementById('login-email').value.trim();
+      const password = document.getElementById('login-password').value;
+      const errEl    = document.getElementById('login-error');
+
+      if (email === ALLOWED_EMAIL && password === ALLOWED_PASSWORD) {
+        sessionStorage.setItem(SESSION_KEY, '1');
+        showApp();
+      } else {
+        errEl.classList.remove('hidden');
+        document.getElementById('login-password').value = '';
+      }
+    }
+
+    function handleLogout() {
+      sessionStorage.removeItem(SESSION_KEY);
+      document.getElementById('app').classList.remove('flex');
+      document.getElementById('app').classList.add('hidden');
+      document.getElementById('login-screen').classList.remove('hidden');
+      document.getElementById('login-email').value = '';
+      document.getElementById('login-password').value = '';
+      document.getElementById('login-error').classList.add('hidden');
+    }
+
+    function showApp() {
+      document.getElementById('login-screen').classList.add('hidden');
+      document.getElementById('app').classList.remove('hidden');
+      document.getElementById('app').classList.add('flex');
+    }
+
+    // Restore session on page load
+    if (sessionStorage.getItem(SESSION_KEY) === '1') {
+      showApp();
+    }
+
     // ── State ──────────────────────────────────────────────────────────────
-    let conversationHistory = [];  // multi-turn history for refinements
-    let currentStoryText = '';     // raw text of current story (for clipboard)
+    let conversationHistory = [];
+    let currentStoryText    = '';
 
     // ── System Prompt ──────────────────────────────────────────────────────
     const SYSTEM_PROMPT = `Du bist ein erfahrener Senior Software Engineer, der einem Product Owner dabei hilft, Anforderungen zu strukturieren. Du denkst kritisch wie jemand, der das Feature später implementieren muss. Du klärst Mehrdeutigkeiten, formulierst testbare Akzeptanzkriterien und identifizierst fehlende Informationen. Deine Outputs folgen immer exakt dem vorgegebenen Template. Sprache: Deutsch.
@@ -223,10 +302,10 @@ Dein Output folgt IMMER exakt diesem Template — ohne Abweichungen:
     }
 
     function setLoading(isLoading) {
-      const genBtn  = document.getElementById('generate-btn');
-      const refBtn  = document.getElementById('refine-btn');
-      const rawIn   = document.getElementById('raw-input');
-      const refIn   = document.getElementById('refinement-input');
+      const genBtn = document.getElementById('generate-btn');
+      const refBtn = document.getElementById('refine-btn');
+      const rawIn  = document.getElementById('raw-input');
+      const refIn  = document.getElementById('refinement-input');
 
       genBtn.disabled = isLoading;
       if (refBtn) refBtn.disabled = isLoading;
@@ -336,7 +415,6 @@ Dein Output folgt IMMER exakt diesem Template — ohne Abweichungen:
         const messages = [{ role: 'user', content: rawInput }];
         const fullText = await callClaude(messages);
 
-        // Build conversation history for future refinements
         conversationHistory = [
           { role: 'user', content: rawInput },
           { role: 'assistant', content: fullText },
@@ -367,7 +445,6 @@ Dein Output folgt IMMER exakt diesem Template — ohne Abweichungen:
         ];
         const fullText = await callClaude(messages);
 
-        // Append to conversation history
         conversationHistory.push({ role: 'user', content: instruction });
         conversationHistory.push({ role: 'assistant', content: fullText });
 
@@ -395,17 +472,12 @@ Dein Output folgt IMMER exakt diesem Template — ohne Abweichungen:
       }
     }
 
-    // ── Enter-Key Shortcuts ────────────────────────────────────────────────
+    // ── Keyboard Shortcuts ─────────────────────────────────────────────────
     document.getElementById('raw-input').addEventListener('keydown', e => {
       if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) handleGenerate();
     });
-    document.addEventListener('DOMContentLoaded', () => {
-      const refIn = document.getElementById('refinement-input');
-      if (refIn) {
-        refIn.addEventListener('keydown', e => {
-          if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) handleRefine();
-        });
-      }
+    document.getElementById('refinement-input').addEventListener('keydown', e => {
+      if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) handleRefine();
     });
   </script>
 
