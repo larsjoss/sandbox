@@ -4,217 +4,380 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Story Generator</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/marked@12/marked.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/dompurify@3/dist/purify.min.js"></script>
+
   <style>
+    :root {
+      --cream:        #F5F0E8;
+      --cream-hover:  #EDE7DA;
+      --parchment:    #FAF7F2;
+      --forest:       #1D2B21;
+      --forest-hover: #253525;
+      --text:         #1A1918;
+      --muted:        #7A7770;
+      --border:       #E0D9CE;
+      --border-light: #EDE8E0;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      background: var(--cream);
+      font-family: 'Inter', system-ui, sans-serif;
+      color: var(--text);
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .font-serif { font-family: 'Playfair Display', Georgia, serif; }
+
+    /* ── Labels ── */
+    .eyebrow {
+      font-size: 0.625rem;
+      font-weight: 500;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    /* ── Inputs ── */
+    .field {
+      width: 100%;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      padding: 0.625rem 0.75rem;
+      font-size: 0.8125rem;
+      font-family: 'Inter', sans-serif;
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .field:focus        { border-color: var(--forest); }
+    .field::placeholder { color: #C4BDB5; }
+
+    .field-area {
+      width: 100%;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      padding: 0.75rem;
+      font-size: 0.8125rem;
+      font-family: 'Inter', sans-serif;
+      color: var(--text);
+      outline: none;
+      resize: none;
+      line-height: 1.65;
+      transition: border-color 0.15s;
+    }
+    .field-area:focus        { border-color: var(--forest); }
+    .field-area::placeholder { color: #C4BDB5; }
+    .field-area:disabled, .field:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    /* ── Buttons ── */
+    .btn-primary {
+      display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+      width: 100%;
+      background: var(--forest);
+      color: #fff;
+      border: none;
+      border-radius: 3px;
+      padding: 0.625rem 1rem;
+      font-size: 0.8125rem;
+      font-family: 'Inter', sans-serif;
+      font-weight: 500;
+      letter-spacing: 0.02em;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .btn-primary:hover    { background: var(--forest-hover); }
+    .btn-primary:disabled { opacity: 0.45; cursor: not-allowed; }
+
+    .btn-secondary {
+      display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+      width: 100%;
+      background: transparent;
+      color: var(--forest);
+      border: 1px solid var(--forest);
+      border-radius: 3px;
+      padding: 0.625rem 1rem;
+      font-size: 0.8125rem;
+      font-family: 'Inter', sans-serif;
+      font-weight: 500;
+      letter-spacing: 0.02em;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .btn-secondary:hover    { background: var(--cream-hover); }
+    .btn-secondary:disabled { opacity: 0.45; cursor: not-allowed; }
+
+    .btn-ghost {
+      display: flex; align-items: center; gap: 0.375rem;
+      background: transparent;
+      color: var(--muted);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      padding: 0.25rem 0.625rem;
+      font-size: 0.75rem;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .btn-ghost:hover { border-color: var(--forest); color: var(--forest); }
+
+    /* ── Markdown prose ── */
+    .prose { font-size: 0.875rem; color: var(--text); line-height: 1.7; }
     .prose strong { font-weight: 600; }
-    .prose p { margin-bottom: 0.75em; line-height: 1.6; }
+    .prose p  { margin-bottom: 0.75em; }
     .prose ul, .prose ol { padding-left: 1.4em; margin-bottom: 0.75em; }
-    .prose li { margin-bottom: 0.3em; line-height: 1.6; }
+    .prose li { margin-bottom: 0.3em; }
     .prose h1, .prose h2, .prose h3 {
-      font-weight: 600;
+      font-family: 'Playfair Display', Georgia, serif;
+      font-weight: 500;
       margin-top: 1.4em;
       margin-bottom: 0.5em;
       line-height: 1.3;
     }
-    .prose a { color: #6366f1; text-decoration: underline; }
-    .prose hr { border-color: #e5e7eb; margin: 1em 0; }
+    .prose a   { color: var(--forest); text-decoration: underline; }
+    .prose hr  { border: none; border-top: 1px solid var(--border); margin: 1.25em 0; }
+
+    /* ── Animations ── */
     @keyframes spin { to { transform: rotate(360deg); } }
     .spinner {
       display: inline-block;
-      width: 16px; height: 16px;
-      border: 2px solid currentColor;
+      width: 13px; height: 13px;
+      border: 1.5px solid currentColor;
       border-top-color: transparent;
       border-radius: 50%;
-      animation: spin 0.7s linear infinite;
+      animation: spin 0.75s linear infinite;
       flex-shrink: 0;
     }
-    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
-    .skeleton { animation: pulse 1.5s ease-in-out infinite; }
+
+    @keyframes shimmer { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
+    .skeleton { animation: shimmer 1.6s ease-in-out infinite; border-radius: 3px; }
   </style>
 </head>
-<body class="bg-gray-50 text-gray-900 antialiased h-screen overflow-hidden flex flex-col">
+<body>
 
-  <!-- ── Login Screen ───────────────────────────────────────────────────── -->
-  <div id="login-screen" class="fixed inset-0 z-50 bg-gray-50 flex items-center justify-center p-4">
-    <div class="w-full max-w-sm">
-      <div class="text-center mb-8">
-        <h1 class="text-2xl font-bold text-gray-900">Story Generator</h1>
-        <p class="text-sm text-gray-500 mt-1">Anforderungen in Stories verwandeln</p>
+  <!-- ══════════════════════════════════════════════════════════════════════
+       LOGIN SCREEN
+  ══════════════════════════════════════════════════════════════════════ -->
+  <div id="login-screen"
+    style="position:fixed;inset:0;z-index:50;background:var(--cream);display:flex;align-items:center;justify-content:center;padding:1.5rem;">
+    <div style="width:100%;max-width:22rem;">
+
+      <!-- Wordmark -->
+      <div style="text-align:center;margin-bottom:2.5rem;">
+        <p class="eyebrow" style="letter-spacing:0.22em;margin-bottom:0.75rem;">Persönliches Produktivitätswerkzeug</p>
+        <h1 class="font-serif" style="font-size:2.25rem;font-weight:400;color:var(--text);line-height:1.2;">
+          Story Generator
+        </h1>
       </div>
-      <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-        <h2 class="text-lg font-semibold text-gray-900 mb-5">Anmelden</h2>
-        <form onsubmit="handleLogin(event)" class="space-y-4">
+
+      <!-- Card -->
+      <div style="background:#fff;border:1px solid var(--border);border-radius:6px;padding:2rem;">
+        <p class="eyebrow" style="margin-bottom:1.5rem;">Anmelden</p>
+
+        <form onsubmit="handleLogin(event)" style="display:flex;flex-direction:column;gap:1rem;">
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">E-Mail</label>
-            <input
-              type="email"
-              id="login-email"
-              required
-              placeholder="name@beispiel.de"
-              class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-            />
+            <label class="eyebrow" style="display:block;margin-bottom:0.4rem;">E-Mail</label>
+            <input type="email" id="login-email" required placeholder="name@beispiel.de" class="field" />
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Passwort</label>
-            <input
-              type="password"
-              id="login-password"
-              required
-              placeholder="••••••••"
-              class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-            />
+            <label class="eyebrow" style="display:block;margin-bottom:0.4rem;">Passwort</label>
+            <input type="password" id="login-password" required placeholder="••••••••" class="field" />
           </div>
-          <div id="login-error" class="hidden text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+
+          <div id="login-error" style="display:none;font-size:0.75rem;color:#9B3A2A;background:#FBF0EE;
+            border:1px solid #F0D0CA;border-radius:3px;padding:0.5rem 0.75rem;">
             E-Mail oder Passwort falsch.
           </div>
-          <button
-            type="submit"
-            class="w-full bg-indigo-500 hover:bg-indigo-600 text-white font-medium py-2 rounded-lg transition-colors"
-          >
+
+          <button type="submit" class="btn-primary" style="margin-top:0.25rem;">
             Anmelden
           </button>
         </form>
       </div>
+
     </div>
   </div>
 
-  <!-- ── App (hidden until login) ──────────────────────────────────────── -->
-  <div id="app" class="hidden flex-col h-screen overflow-hidden">
 
-    <!-- API Key Header -->
-    <header class="flex-shrink-0 bg-white border-b border-gray-200 px-4 py-2.5 flex items-center gap-3">
-      <span class="text-sm font-semibold text-gray-700 whitespace-nowrap">Story Generator</span>
-      <div class="w-px h-4 bg-gray-200"></div>
-      <label class="text-xs font-medium text-gray-500 whitespace-nowrap">Anthropic API Key</label>
-      <input
-        type="password"
-        id="api-key"
-        placeholder="sk-ant-api03-..."
-        class="flex-1 max-w-xs border border-gray-200 rounded-lg px-3 py-1.5 text-xs font-mono text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent"
+  <!-- ══════════════════════════════════════════════════════════════════════
+       APP SHELL  (hidden until login)
+  ══════════════════════════════════════════════════════════════════════ -->
+  <div id="app" style="display:none;flex-direction:column;height:100vh;overflow:hidden;">
+
+    <!-- ── Header ───────────────────────────────────────────────────────── -->
+    <header style="flex-shrink:0;background:var(--forest);display:flex;align-items:center;
+      gap:1rem;padding:0 1.25rem;height:44px;">
+
+      <span class="font-serif" style="color:#fff;font-size:0.9375rem;font-weight:400;
+        letter-spacing:0.01em;white-space:nowrap;">Story Generator</span>
+
+      <div style="width:1px;height:1rem;background:rgba(255,255,255,0.15);flex-shrink:0;"></div>
+
+      <span class="eyebrow" style="color:rgba(255,255,255,0.4);white-space:nowrap;">API-KEY</span>
+
+      <input type="password" id="api-key" placeholder="sk-..."
+        style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.13);
+          border-radius:3px;padding:0.3125rem 0.625rem;font-size:0.75rem;font-family:monospace;
+          color:rgba(255,255,255,0.75);outline:none;max-width:260px;width:100%;
+          transition:border-color 0.15s;"
+        onfocus="this.style.borderColor='rgba(255,255,255,0.4)'"
+        onblur="this.style.borderColor='rgba(255,255,255,0.13)'"
       />
-      <span class="text-xs text-gray-400 hidden sm:block">Wird nur lokal verwendet – nicht gespeichert, nicht übertragen</span>
-      <button
-        onclick="handleLogout()"
-        class="ml-auto text-xs text-gray-400 hover:text-gray-600 transition-colors whitespace-nowrap"
-      >
-        Abmelden
-      </button>
+
+      <span style="margin-left:auto;font-size:0.6875rem;color:rgba(255,255,255,0.3);
+        white-space:nowrap;display:none;" class="sm-show">
+        Lokal — nicht gespeichert
+      </span>
+
+      <button onclick="handleLogout()"
+        style="font-size:0.75rem;color:rgba(255,255,255,0.4);background:none;border:none;
+          cursor:pointer;white-space:nowrap;margin-left:auto;transition:color 0.15s;
+          font-family:'Inter',sans-serif;letter-spacing:0.02em;"
+        onmouseover="this.style.color='rgba(255,255,255,0.75)'"
+        onmouseout="this.style.color='rgba(255,255,255,0.4)'"
+      >Abmelden</button>
     </header>
 
-    <!-- 3-Panel Layout -->
-    <main class="flex-1 grid overflow-hidden" style="grid-template-columns: 280px 1fr 320px;">
+    <!-- ── 3-Panel Grid ──────────────────────────────────────────────────── -->
+    <main style="flex:1;display:grid;grid-template-columns:272px 1fr 296px;overflow:hidden;">
 
-      <!-- Left: Input Panel -->
-      <aside class="border-r border-gray-200 bg-white overflow-y-auto flex flex-col">
-        <div class="p-4 flex flex-col gap-5 flex-1">
+      <!-- LEFT: Input Panel -->
+      <aside style="background:var(--parchment);border-right:1px solid var(--border);
+        overflow-y:auto;display:flex;flex-direction:column;">
+        <div style="padding:1.25rem;display:flex;flex-direction:column;gap:1.25rem;flex:1;">
+
+          <!-- Generate -->
           <section>
-            <h2 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Anforderung</h2>
-            <textarea
-              id="raw-input"
-              rows="9"
-              placeholder="Beschreibe die Anforderung in deinen eigenen Worten — Slack-Nachricht, Sticky Note, spontane Idee…"
-              class="w-full resize-none border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent leading-relaxed"
-            ></textarea>
-            <button
-              id="generate-btn"
-              onclick="handleGenerate()"
-              class="mt-3 w-full bg-indigo-500 hover:bg-indigo-600 text-white font-medium py-2.5 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm"
-            >
+            <p class="eyebrow" style="margin-bottom:0.75rem;">Anforderung</p>
+            <textarea id="raw-input" rows="9" class="field-area"
+              placeholder="Beschreibe die Anforderung in deinen eigenen Worten — Slack-Nachricht, Sticky Note, spontane Idee…"></textarea>
+            <button id="generate-btn" onclick="handleGenerate()" class="btn-primary" style="margin-top:0.625rem;">
               Story generieren
             </button>
           </section>
 
-          <section id="refine-section" class="hidden border-t border-gray-100 pt-4">
-            <h2 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Refinement-Anweisung</h2>
-            <textarea
-              id="refinement-input"
-              rows="4"
-              placeholder='z.B. "Mach AK-2 spezifischer" oder "Berücksichtige den Offline-Fall"'
-              class="w-full resize-none border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent leading-relaxed"
-            ></textarea>
-            <button
-              id="refine-btn"
-              onclick="handleRefine()"
-              class="mt-3 w-full bg-white border border-indigo-500 text-indigo-600 hover:bg-indigo-50 font-medium py-2.5 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm"
-            >
+          <!-- Refine (hidden until first story) -->
+          <section id="refine-section" style="display:none;border-top:1px solid var(--border-light);padding-top:1.25rem;">
+            <p class="eyebrow" style="margin-bottom:0.75rem;">Refinement-Anweisung</p>
+            <textarea id="refinement-input" rows="4" class="field-area"
+              placeholder='z.B. „Mach AK-2 spezifischer" oder „Berücksichtige den Offline-Fall"'></textarea>
+            <button id="refine-btn" onclick="handleRefine()" class="btn-secondary" style="margin-top:0.625rem;">
               Story verfeinern
             </button>
           </section>
+
         </div>
       </aside>
 
-      <!-- Center: Story Output Panel -->
-      <section class="bg-white overflow-y-auto flex flex-col">
-        <div class="flex-shrink-0 flex items-center justify-between px-4 py-3 border-b border-gray-100">
-          <h2 class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Story</h2>
-          <button
-            id="copy-btn"
-            onclick="handleCopy()"
-            class="hidden items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
-          >
-            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <!-- CENTER: Story Output -->
+      <section style="background:#fff;overflow-y:auto;display:flex;flex-direction:column;">
+
+        <!-- Panel header -->
+        <div style="flex-shrink:0;display:flex;align-items:center;justify-content:space-between;
+          padding:0.625rem 1.5rem;border-bottom:1px solid var(--border-light);">
+          <p class="eyebrow">Story</p>
+          <button id="copy-btn" onclick="handleCopy()" class="btn-ghost" style="display:none;">
+            <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                 d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
             </svg>
             <span id="copy-label">Kopieren</span>
           </button>
         </div>
-        <div id="story-output" class="flex-1 px-6 py-5">
-          <div id="story-empty" class="flex flex-col items-center justify-center h-full min-h-48 text-center">
-            <div class="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mb-4">
-              <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+
+        <!-- Content area -->
+        <div style="flex:1;padding:2rem 2.5rem;">
+
+          <!-- Empty state -->
+          <div id="story-empty"
+            style="display:flex;flex-direction:column;align-items:center;justify-content:center;
+              height:100%;min-height:12rem;text-align:center;">
+            <div style="width:2.75rem;height:2.75rem;background:var(--cream);border:1px solid var(--border);
+              border-radius:4px;display:flex;align-items:center;justify-content:center;margin-bottom:1rem;">
+              <svg width="18" height="18" fill="none" stroke="currentColor" style="color:var(--muted);" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
                   d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
               </svg>
             </div>
-            <p class="text-sm text-gray-500">Gib eine Anforderung ein und klicke auf „Story generieren".</p>
+            <p style="font-size:0.8125rem;color:var(--muted);max-width:22rem;line-height:1.6;">
+              Gib eine Anforderung ein und klicke auf „Story generieren".
+            </p>
           </div>
-          <div id="story-skeleton" class="hidden space-y-3">
-            <div class="skeleton h-5 bg-gray-200 rounded w-2/3"></div>
-            <div class="skeleton h-3 bg-gray-100 rounded w-full"></div>
-            <div class="skeleton h-3 bg-gray-100 rounded w-5/6"></div>
-            <div class="skeleton h-3 bg-gray-100 rounded w-4/6"></div>
-            <div class="skeleton h-5 bg-gray-200 rounded w-1/2 mt-5"></div>
-            <div class="skeleton h-3 bg-gray-100 rounded w-full"></div>
-            <div class="skeleton h-3 bg-gray-100 rounded w-full"></div>
-            <div class="skeleton h-3 bg-gray-100 rounded w-3/4"></div>
-            <div class="skeleton h-5 bg-gray-200 rounded w-1/3 mt-5"></div>
-            <div class="skeleton h-3 bg-gray-100 rounded w-full"></div>
-            <div class="skeleton h-3 bg-gray-100 rounded w-5/6"></div>
+
+          <!-- Skeleton -->
+          <div id="story-skeleton" style="display:none;">
+            <div class="skeleton" style="height:1.1rem;background:#EDE8E0;width:58%;margin-bottom:1.25rem;"></div>
+            <div class="skeleton" style="height:0.75rem;background:#F2EDE5;width:100%;margin-bottom:0.5rem;"></div>
+            <div class="skeleton" style="height:0.75rem;background:#F2EDE5;width:88%;margin-bottom:0.5rem;"></div>
+            <div class="skeleton" style="height:0.75rem;background:#F2EDE5;width:72%;margin-bottom:1.75rem;"></div>
+            <div class="skeleton" style="height:1rem;background:#EDE8E0;width:40%;margin-bottom:1rem;"></div>
+            <div class="skeleton" style="height:0.75rem;background:#F2EDE5;width:100%;margin-bottom:0.5rem;"></div>
+            <div class="skeleton" style="height:0.75rem;background:#F2EDE5;width:95%;margin-bottom:0.5rem;"></div>
+            <div class="skeleton" style="height:0.75rem;background:#F2EDE5;width:80%;margin-bottom:1.75rem;"></div>
+            <div class="skeleton" style="height:1rem;background:#EDE8E0;width:32%;margin-bottom:1rem;"></div>
+            <div class="skeleton" style="height:0.75rem;background:#F2EDE5;width:100%;margin-bottom:0.5rem;"></div>
+            <div class="skeleton" style="height:0.75rem;background:#F2EDE5;width:66%;"></div>
           </div>
-          <div id="story-content" class="hidden prose text-sm text-gray-800 max-w-none"></div>
+
+          <!-- Rendered story -->
+          <div id="story-content" class="prose" style="display:none;"></div>
         </div>
       </section>
 
-      <!-- Right: Insights Panel -->
-      <aside class="border-l border-gray-200 bg-amber-50 overflow-y-auto flex flex-col">
-        <div class="flex-shrink-0 px-4 py-3 border-b border-amber-100">
-          <h2 class="text-xs font-semibold text-amber-700 uppercase tracking-wider">Refinement Hinweise</h2>
+      <!-- RIGHT: Insights Panel -->
+      <aside style="background:var(--parchment);border-left:1px solid var(--border);
+        overflow-y:auto;display:flex;flex-direction:column;">
+
+        <div style="flex-shrink:0;padding:0.625rem 1.125rem;border-bottom:1px solid var(--border-light);">
+          <p class="eyebrow" style="color:#8C7B5E;">Refinement Hinweise</p>
         </div>
-        <div id="insights-output" class="flex-1 px-4 py-4">
-          <div id="insights-empty">
-            <p class="text-xs text-center py-8" style="color: rgba(180,120,20,0.5);">
-              KI-Hinweise erscheinen hier nach der Generierung.
+
+        <div style="flex:1;padding:1.125rem;">
+
+          <!-- Empty -->
+          <div id="insights-empty" style="text-align:center;padding:2rem 0;">
+            <p style="font-size:0.75rem;color:#B5A88C;line-height:1.6;">
+              KI-Hinweise erscheinen<br>nach der Generierung.
             </p>
           </div>
-          <div id="insights-skeleton" class="hidden space-y-2">
-            <div class="skeleton h-3 bg-amber-100 rounded w-full"></div>
-            <div class="skeleton h-3 bg-amber-100 rounded w-5/6"></div>
-            <div class="skeleton h-3 bg-amber-100 rounded w-4/6"></div>
-            <div class="skeleton h-3 bg-amber-100 rounded w-full mt-3"></div>
-            <div class="skeleton h-3 bg-amber-100 rounded w-3/4"></div>
+
+          <!-- Skeleton -->
+          <div id="insights-skeleton" style="display:none;">
+            <div class="skeleton" style="height:0.625rem;background:#EDE8DC;width:100%;margin-bottom:0.4rem;"></div>
+            <div class="skeleton" style="height:0.625rem;background:#EDE8DC;width:84%;margin-bottom:0.4rem;"></div>
+            <div class="skeleton" style="height:0.625rem;background:#EDE8DC;width:68%;margin-bottom:1rem;"></div>
+            <div class="skeleton" style="height:0.625rem;background:#EDE8DC;width:100%;margin-bottom:0.4rem;"></div>
+            <div class="skeleton" style="height:0.625rem;background:#EDE8DC;width:76%;"></div>
           </div>
-          <div id="insights-content" class="hidden prose text-xs text-amber-900 max-w-none"></div>
+
+          <!-- Content -->
+          <div id="insights-content" class="prose" style="display:none;font-size:0.8125rem;color:#5C4F3A;"></div>
+
         </div>
       </aside>
 
     </main>
   </div>
 
-  <!-- ── JavaScript ─────────────────────────────────────────────────────── -->
+
+  <!-- ══════════════════════════════════════════════════════════════════════
+       JAVASCRIPT  (Logik unverändert)
+  ══════════════════════════════════════════════════════════════════════ -->
   <script>
+
     // ── Auth ───────────────────────────────────────────────────────────────
     const ALLOWED_EMAIL    = 'lars_joss@bluewin.ch';
     const ALLOWED_PASSWORD = 'Test1234';
@@ -230,31 +393,26 @@
         sessionStorage.setItem(SESSION_KEY, '1');
         showApp();
       } else {
-        errEl.classList.remove('hidden');
+        errEl.style.display = 'block';
         document.getElementById('login-password').value = '';
       }
     }
 
     function handleLogout() {
       sessionStorage.removeItem(SESSION_KEY);
-      document.getElementById('app').classList.remove('flex');
-      document.getElementById('app').classList.add('hidden');
-      document.getElementById('login-screen').classList.remove('hidden');
-      document.getElementById('login-email').value = '';
+      document.getElementById('app').style.display = 'none';
+      document.getElementById('login-screen').style.display = 'flex';
+      document.getElementById('login-email').value    = '';
       document.getElementById('login-password').value = '';
-      document.getElementById('login-error').classList.add('hidden');
+      document.getElementById('login-error').style.display = 'none';
     }
 
     function showApp() {
-      document.getElementById('login-screen').classList.add('hidden');
-      document.getElementById('app').classList.remove('hidden');
-      document.getElementById('app').classList.add('flex');
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('app').style.display = 'flex';
     }
 
-    // Restore session on page load
-    if (sessionStorage.getItem(SESSION_KEY) === '1') {
-      showApp();
-    }
+    if (sessionStorage.getItem(SESSION_KEY) === '1') showApp();
 
     // ── State ──────────────────────────────────────────────────────────────
     let conversationHistory = [];
@@ -290,7 +448,7 @@ Dein Output folgt IMMER exakt diesem Template — ohne Abweichungen:
       const parts = text.split(/^\*\*Refinement Hinweise\*\*/m);
       if (parts.length >= 2) {
         return {
-          generatedStory: parts[0].trim(),
+          generatedStory:  parts[0].trim(),
           refinementHints: parts.slice(1).join('**Refinement Hinweise**').trim(),
         };
       }
@@ -301,79 +459,75 @@ Dein Output folgt IMMER exakt diesem Template — ohne Abweichungen:
       return DOMPurify.sanitize(marked.parse(text));
     }
 
-    function setLoading(isLoading) {
+    function setLoading(on) {
       const genBtn = document.getElementById('generate-btn');
       const refBtn = document.getElementById('refine-btn');
       const rawIn  = document.getElementById('raw-input');
       const refIn  = document.getElementById('refinement-input');
 
-      genBtn.disabled = isLoading;
-      if (refBtn) refBtn.disabled = isLoading;
-      rawIn.disabled  = isLoading;
-      if (refIn) refIn.disabled = isLoading;
+      genBtn.disabled = on;
+      if (refBtn) refBtn.disabled = on;
+      rawIn.disabled  = on;
+      if (refIn) refIn.disabled = on;
 
-      if (isLoading) {
-        genBtn.innerHTML = '<span class="spinner"></span> Story wird generiert…';
-        if (refBtn) refBtn.innerHTML = '<span class="spinner" style="border-color:#6366f1;border-top-color:transparent;"></span> Story wird verfeinert…';
-      } else {
-        genBtn.innerHTML = 'Story generieren';
-        if (refBtn) refBtn.innerHTML = 'Story verfeinern';
-      }
+      genBtn.innerHTML = on
+        ? '<span class="spinner"></span> Story wird generiert…'
+        : 'Story generieren';
+      if (refBtn) refBtn.innerHTML = on
+        ? '<span class="spinner"></span> Story wird verfeinert…'
+        : 'Story verfeinern';
     }
 
     function showSkeleton() {
-      document.getElementById('story-empty').classList.add('hidden');
-      document.getElementById('story-content').classList.add('hidden');
-      document.getElementById('story-skeleton').classList.remove('hidden');
-      document.getElementById('insights-empty').classList.add('hidden');
-      document.getElementById('insights-content').classList.add('hidden');
-      document.getElementById('insights-skeleton').classList.remove('hidden');
-      document.getElementById('copy-btn').classList.remove('flex');
-      document.getElementById('copy-btn').classList.add('hidden');
+      document.getElementById('story-empty').style.display    = 'none';
+      document.getElementById('story-content').style.display  = 'none';
+      document.getElementById('story-skeleton').style.display = 'block';
+      document.getElementById('insights-empty').style.display    = 'none';
+      document.getElementById('insights-content').style.display  = 'none';
+      document.getElementById('insights-skeleton').style.display = 'block';
+      document.getElementById('copy-btn').style.display = 'none';
     }
 
     function showStory(generatedStory, refinementHints) {
-      document.getElementById('story-skeleton').classList.add('hidden');
-      document.getElementById('story-empty').classList.add('hidden');
-      const content = document.getElementById('story-content');
-      content.innerHTML = renderMarkdown(generatedStory);
-      content.classList.remove('hidden');
+      document.getElementById('story-skeleton').style.display = 'none';
+      document.getElementById('story-empty').style.display    = 'none';
+      const sc = document.getElementById('story-content');
+      sc.innerHTML     = renderMarkdown(generatedStory);
+      sc.style.display = 'block';
 
-      document.getElementById('insights-skeleton').classList.add('hidden');
-      document.getElementById('insights-empty').classList.add('hidden');
-      const insightsContent = document.getElementById('insights-content');
+      document.getElementById('insights-skeleton').style.display = 'none';
+      const ic = document.getElementById('insights-content');
       if (refinementHints) {
-        insightsContent.innerHTML = renderMarkdown(refinementHints);
-        insightsContent.classList.remove('hidden');
+        ic.innerHTML     = renderMarkdown(refinementHints);
+        ic.style.display = 'block';
+        document.getElementById('insights-empty').style.display = 'none';
       } else {
-        insightsContent.classList.add('hidden');
-        document.getElementById('insights-empty').classList.remove('hidden');
-        document.getElementById('insights-empty').innerHTML =
-          '<p class="text-xs text-amber-700/60 py-2">Keine offenen Punkte identifiziert.</p>';
+        ic.style.display = 'none';
+        const ie = document.getElementById('insights-empty');
+        ie.innerHTML     = '<p style="font-size:0.75rem;color:#B5A88C;">Keine offenen Punkte identifiziert.</p>';
+        ie.style.display = 'block';
       }
 
-      document.getElementById('copy-btn').classList.remove('hidden');
-      document.getElementById('copy-btn').classList.add('flex');
-      document.getElementById('refine-section').classList.remove('hidden');
+      document.getElementById('copy-btn').style.display = 'flex';
+      document.getElementById('refine-section').style.display = 'block';
     }
 
     function showError(message) {
-      document.getElementById('story-skeleton').classList.add('hidden');
-      document.getElementById('insights-skeleton').classList.add('hidden');
-      const content = document.getElementById('story-content');
-      content.innerHTML = `<div class="rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+      document.getElementById('story-skeleton').style.display    = 'none';
+      document.getElementById('insights-skeleton').style.display = 'none';
+      const sc = document.getElementById('story-content');
+      sc.innerHTML = `<div style="background:#FBF0EE;border:1px solid #F0D0CA;border-radius:3px;
+        padding:0.75rem 1rem;font-size:0.8125rem;color:#9B3A2A;">
         <strong>Fehler:</strong> ${DOMPurify.sanitize(message)}
       </div>`;
-      content.classList.remove('hidden');
-      document.getElementById('story-empty').classList.add('hidden');
+      sc.style.display = 'block';
+      document.getElementById('story-empty').style.display = 'none';
     }
 
-    // ── Anthropic API Call ─────────────────────────────────────────────────
+    // ── API Call ───────────────────────────────────────────────────────────
     async function callClaude(messages) {
       const apiKey = getApiKey();
-      if (!apiKey) {
-        throw new Error('Bitte zuerst den Anthropic API Key oben eingeben.');
-      }
+      if (!apiKey) throw new Error('Bitte zuerst den API-Key oben eingeben.');
 
       const response = await fetch('https://api.anthropic.com/v1/messages', {
         method: 'POST',
@@ -397,10 +551,7 @@ Dein Output folgt IMMER exakt diesem Template — ohne Abweichungen:
       }
 
       const data = await response.json();
-      return data.content
-        .filter(b => b.type === 'text')
-        .map(b => b.text)
-        .join('');
+      return data.content.filter(b => b.type === 'text').map(b => b.text).join('');
     }
 
     // ── Generate ───────────────────────────────────────────────────────────
@@ -416,8 +567,8 @@ Dein Output folgt IMMER exakt diesem Template — ohne Abweichungen:
         const fullText = await callClaude(messages);
 
         conversationHistory = [
-          { role: 'user', content: rawInput },
-          { role: 'assistant', content: fullText },
+          { role: 'user',      content: rawInput  },
+          { role: 'assistant', content: fullText  },
         ];
 
         const { generatedStory, refinementHints } = parseOutput(fullText);
@@ -439,14 +590,11 @@ Dein Output folgt IMMER exakt diesem Template — ohne Abweichungen:
       showSkeleton();
 
       try {
-        const messages = [
-          ...conversationHistory,
-          { role: 'user', content: instruction },
-        ];
-        const fullText = await callClaude(messages);
+        const messages  = [...conversationHistory, { role: 'user', content: instruction }];
+        const fullText  = await callClaude(messages);
 
-        conversationHistory.push({ role: 'user', content: instruction });
-        conversationHistory.push({ role: 'assistant', content: fullText });
+        conversationHistory.push({ role: 'user',      content: instruction });
+        conversationHistory.push({ role: 'assistant', content: fullText    });
 
         const { generatedStory, refinementHints } = parseOutput(fullText);
         currentStoryText = generatedStory;
@@ -464,22 +612,22 @@ Dein Output folgt IMMER exakt diesem Template — ohne Abweichungen:
       if (!currentStoryText) return;
       try {
         await navigator.clipboard.writeText(currentStoryText);
-        const label = document.getElementById('copy-label');
-        label.textContent = 'Kopiert!';
-        setTimeout(() => { label.textContent = 'Kopieren'; }, 2000);
+        const lbl = document.getElementById('copy-label');
+        lbl.textContent = 'Kopiert';
+        setTimeout(() => { lbl.textContent = 'Kopieren'; }, 2000);
       } catch {
         alert('Kopieren fehlgeschlagen. Bitte manuell kopieren.');
       }
     }
 
-    // ── Keyboard Shortcuts ─────────────────────────────────────────────────
+    // ── Keyboard shortcuts ─────────────────────────────────────────────────
     document.getElementById('raw-input').addEventListener('keydown', e => {
       if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) handleGenerate();
     });
     document.getElementById('refinement-input').addEventListener('keydown', e => {
       if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) handleRefine();
     });
-  </script>
 
+  </script>
 </body>
 </html>
