@@ -18,6 +18,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Build frontend
+        working-directory: story-generator/frontend
+        run: |
+          npm ci
+          npm run build
+
       - name: Copy static frontend
         run: |
           mkdir -p story-generator/frontend/dist/story-generator/frontend-static
