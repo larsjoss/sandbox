@@ -10,6 +10,17 @@ interface Props {
   isGenerating?: boolean;
 }
 
+// Visual formatting applied at render time (stored data is unchanged).
+// 1. Standalone bold headers **Foo** → **Foo:**
+// 2. Title line **Titel** — text → **Titel:** — text
+// 3. AK list items  - AK-1: text → - **AK-1:** text
+function formatStoryMarkdown(raw: string): string {
+  return raw
+    .replace(/^(\*\*[^*\n]+?)\*\*(\s*—)/gm, '$1:**$2')
+    .replace(/^\*\*([^*\n]+?)\*\*\s*$/gm, '**$1:**')
+    .replace(/^([ \t]*[-*][ \t]+)(AK-\d+):/gm, '$1**$2:**');
+}
+
 function Skeleton() {
   return (
     <div className="animate-pulse space-y-3 p-4" aria-hidden="true">
@@ -102,7 +113,9 @@ export function StoryOutputPanel({ story, isLoading, isGenerating }: Props) {
         )}
         {story && (
           <div className="prose prose-sm max-w-none prose-headings:font-semibold prose-strong:font-semibold">
-            <ReactMarkdown rehypePlugins={[rehypeSanitize]}>{story.generatedStory}</ReactMarkdown>
+            <ReactMarkdown rehypePlugins={[rehypeSanitize]}>
+              {formatStoryMarkdown(story.generatedStory)}
+            </ReactMarkdown>
           </div>
         )}
       </div>
