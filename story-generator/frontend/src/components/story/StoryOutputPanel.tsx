@@ -7,6 +7,7 @@ interface Props {
   story?: Story;
   isLoading?: boolean;
   isGenerating?: boolean;
+  isRefining?: boolean;
 }
 
 // Visual formatting applied at render time (stored data is unchanged).
@@ -20,7 +21,7 @@ function formatStoryMarkdown(raw: string): string {
     .replace(/^([ \t]*[-*][ \t]+)(AK-\d+):/gm, '$1**$2:**');
 }
 
-export function StoryOutputPanel({ story, isLoading, isGenerating }: Props) {
+export function StoryOutputPanel({ story, isLoading, isGenerating, isRefining }: Props) {
   const outputRef = useRef<HTMLDivElement>(null);
   const wasGenerating = useRef(false);
   const [copied, setCopied] = useState(false);
@@ -51,6 +52,14 @@ export function StoryOutputPanel({ story, isLoading, isGenerating }: Props) {
       <div className="px-5 py-3.5 border-b border-edge shrink-0">
         <h2 className="text-xs font-semibold text-ink-secondary uppercase tracking-widest">Story</h2>
       </div>
+
+      {/* Non-blocking refinement banner — keeps story text visible (ANF-06) */}
+      {isRefining && (
+        <div className="shrink-0 px-5 py-2 bg-brand-light border-b border-brand/20 flex items-center gap-2" role="status" aria-live="polite">
+          <span className="w-3.5 h-3.5 border-2 border-brand border-t-transparent rounded-full animate-spin shrink-0" aria-hidden="true" />
+          <span className="text-xs font-medium text-brand">Story wird verfeinert…</span>
+        </div>
+      )}
 
       {/*
        * WCAG 2.4.7 – tabIndex={-1}: nur programmatisch fokussierbar.

@@ -10,25 +10,28 @@ export function WorkspacePage() {
   const { id } = useParams<{ id?: string }>();
   const { data, isLoading } = useStory(id);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isRefining, setIsRefining] = useState(false);
 
   const story = data?.story;
 
   return (
     <AppShell
-      leftPanel={
-        <StoryInputPanel
-          activeStory={story}
-          onGeneratingChange={setIsGenerating}
-        />
-      }
+      leftPanel={<StoryInputPanel onGeneratingChange={setIsGenerating} />}
       centerPanel={
         <StoryOutputPanel
           story={story}
           isLoading={isLoading && !!id}
           isGenerating={isGenerating}
+          isRefining={isRefining}
         />
       }
-      rightPanel={<InsightsPanel story={story} isLoading={isLoading && !!id} />}
+      rightPanel={
+        <InsightsPanel
+          story={story}
+          isLoading={isLoading && !!id}
+          onRefiningChange={setIsRefining}
+        />
+      }
     />
   );
 }

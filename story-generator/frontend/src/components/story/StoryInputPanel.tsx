@@ -1,23 +1,15 @@
 import { useState, FormEvent, useEffect } from 'react';
-import { useGenerateStory, useRefineStory } from '../../hooks/useStory';
-import type { Story } from '../../types';
+import { useGenerateStory } from '../../hooks/useStory';
 
 interface Props {
-  activeStory?: Story;
   onGeneratingChange?: (generating: boolean) => void;
 }
 
-export function StoryInputPanel({ activeStory, onGeneratingChange }: Props) {
+export function StoryInputPanel({ onGeneratingChange }: Props) {
   const [rawInput, setRawInput] = useState('');
-  const [refinementInstruction, setRefinementInstruction] = useState('');
-
   const generateStory = useGenerateStory();
-  const refineStory = useRefineStory(activeStory?.id ?? '');
-
   const isGenerating = generateStory.isPending;
-  const isRefining = refineStory.isPending;
   const generateError = generateStory.error;
-  const refineError = refineStory.error;
 
   useEffect(() => {
     onGeneratingChange?.(isGenerating);
@@ -28,14 +20,6 @@ export function StoryInputPanel({ activeStory, onGeneratingChange }: Props) {
     if (!rawInput.trim()) return;
     generateStory.mutate(rawInput.trim(), {
       onSuccess: () => setRawInput(''),
-    });
-  };
-
-  const handleRefine = (e: FormEvent) => {
-    e.preventDefault();
-    if (!refinementInstruction.trim() || !activeStory) return;
-    refineStory.mutate(refinementInstruction.trim(), {
-      onSuccess: () => setRefinementInstruction(''),
     });
   };
 
@@ -51,7 +35,7 @@ export function StoryInputPanel({ activeStory, onGeneratingChange }: Props) {
         </h2>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-5 flex flex-col gap-6">
+      <div className="flex-1 overflow-y-auto p-5">
         <section aria-labelledby="anforderung-heading">
           <form onSubmit={handleGenerate} className="space-y-3">
             <div>
@@ -92,49 +76,6 @@ export function StoryInputPanel({ activeStory, onGeneratingChange }: Props) {
             </button>
           </form>
         </section>
-
-        {activeStory && (
-          <section aria-label="Refinement-Anweisung" className="border-t border-edge pt-4">
-            <form onSubmit={handleRefine} className="space-y-3">
-              <div>
-                <label htmlFor="refinement-input" className="sr-only">
-                  Refinement-Anweisung eingeben
-                </label>
-                <textarea
-                  id="refinement-input"
-                  value={refinementInstruction}
-                  onChange={(e) => setRefinementInstruction(e.target.value)}
-                  placeholder="Bspw. «Mach AK-2 spezifischer»"
-                  rows={4}
-                  className="w-full resize-none border border-edge rounded-lg px-3.5 py-3 text-sm text-ink bg-surface placeholder:text-ink-tertiary focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent leading-relaxed"
-                />
-              </div>
-
-              {refineError && (
-                <p role="alert" className="text-xs text-red-700 bg-red-50 border border-red-200 rounded px-3 py-2">
-                  {refineError instanceof Error ? refineError.message : 'Fehler beim Verfeinern.'}
-                </p>
-              )}
-
-              {/* WCAG 2.4.7 – Focus Visible: expliziter Fokus-Ring */}
-              <button
-                type="submit"
-                disabled={isRefining || !refinementInstruction.trim()}
-                aria-busy={isRefining}
-                className="w-full bg-surface border border-brand text-brand hover:bg-brand-light font-medium py-2.5 rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2 focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-2 focus:ring-offset-canvas"
-              >
-                {isRefining ? (
-                  <>
-                    <span className="w-4 h-4 border-2 border-brand border-t-transparent rounded-full animate-spin" aria-hidden="true" />
-                    Story wird verfeinert…
-                  </>
-                ) : (
-                  'Story verfeinern'
-                )}
-              </button>
-            </form>
-          </section>
-        )}
       </div>
     </div>
   );
