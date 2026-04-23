@@ -1,10 +1,6 @@
 import { useState, FormEvent } from 'react';
 import { useAuth } from '../../context/AuthContext';
 
-interface Props {
-  onSwitch: () => void;
-}
-
 function EyeIcon() {
   return (
     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -28,7 +24,6 @@ function RevealButton({ show, onToggle, label }: { show: boolean; onToggle: () =
       type="button"
       onClick={onToggle}
       aria-label={label}
-      /* min 44×44 px Touch-Target; -m-1 kompensiert visuellen Überlauf */
       className="absolute right-1 top-1/2 -translate-y-1/2 min-h-[44px] min-w-[44px] flex items-center justify-center -m-1 text-gray-500 hover:text-gray-700 rounded focus:outline-none focus:ring-2 focus:ring-brand"
     >
       {show ? <EyeOffIcon /> : <EyeIcon />}
@@ -36,7 +31,7 @@ function RevealButton({ show, onToggle, label }: { show: boolean; onToggle: () =
   );
 }
 
-export function LoginForm({ onSwitch: _onSwitch }: Props) {
+export function LoginForm() {
   const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -71,14 +66,10 @@ export function LoginForm({ onSwitch: _onSwitch }: Props) {
           required
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          /* placeholder:text-gray-500 = #6b7280 on white #fff ≈ 4.83:1 (WCAG AA ✓) */
           className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent placeholder:text-gray-500"
           placeholder="name@beispiel.de"
           autoComplete="email"
         />
-        <p className="mt-1 text-xs text-gray-500" id="login-email-hint">
-          Format: name@beispiel.de
-        </p>
       </div>
 
       <div>
@@ -95,7 +86,6 @@ export function LoginForm({ onSwitch: _onSwitch }: Props) {
             className="w-full border border-gray-300 rounded-lg px-3 py-2 pr-12 text-sm focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent placeholder:text-gray-500"
             placeholder="Passwort eingeben"
             autoComplete="current-password"
-            aria-describedby="login-password-hint"
           />
           <RevealButton
             show={showPassword}
@@ -103,9 +93,6 @@ export function LoginForm({ onSwitch: _onSwitch }: Props) {
             label={showPassword ? 'Passwort verbergen' : 'Passwort anzeigen'}
           />
         </div>
-        <p className="mt-1 text-xs text-gray-500" id="login-password-hint">
-          Mindestens 8 Zeichen
-        </p>
       </div>
 
       <div>
@@ -151,7 +138,7 @@ export function LoginForm({ onSwitch: _onSwitch }: Props) {
       <button
         type="submit"
         disabled={loading}
-        className="w-full bg-brand hover:bg-brand-dark text-white font-medium py-2 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        className="w-full bg-brand hover:bg-brand-dark text-white font-medium py-2 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-2"
       >
         {loading ? 'Anmelden…' : 'Anmelden'}
       </button>
