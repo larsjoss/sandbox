@@ -62,7 +62,7 @@ export function StoryInputPanel({ activeStory, onGeneratingChange }: Props) {
                 id="anforderung-input"
                 value={rawInput}
                 onChange={(e) => setRawInput(e.target.value)}
-                placeholder="Slack-Nachricht, Sticky Note oder spontane Idee — einfach in eigenen Worten beschreiben."
+                placeholder="Anforderung in eigenen Worten beschreiben."
                 rows={8}
                 className="w-full resize-none border border-edge rounded-lg px-3.5 py-3 text-sm text-ink bg-surface placeholder:text-ink-tertiary focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent leading-relaxed"
               />
@@ -94,13 +94,7 @@ export function StoryInputPanel({ activeStory, onGeneratingChange }: Props) {
         </section>
 
         {activeStory && (
-          <section aria-labelledby="refinement-heading" className="border-t border-edge pt-5">
-            <h2
-              id="refinement-heading"
-              className="text-xs font-semibold text-ink-secondary uppercase tracking-widest mb-4"
-            >
-              Refinement-Anweisung
-            </h2>
+          <section aria-label="Refinement-Anweisung" className="border-t border-edge pt-4">
             <form onSubmit={handleRefine} className="space-y-3">
               <div>
                 <label htmlFor="refinement-input" className="sr-only">
@@ -110,7 +104,7 @@ export function StoryInputPanel({ activeStory, onGeneratingChange }: Props) {
                   id="refinement-input"
                   value={refinementInstruction}
                   onChange={(e) => setRefinementInstruction(e.target.value)}
-                  placeholder="z. B. «Mach AK-2 spezifischer» oder «Berücksichtige den Offline-Fall»"
+                  placeholder="Bspw. «Mach AK-2 spezifischer»"
                   rows={4}
                   className="w-full resize-none border border-edge rounded-lg px-3.5 py-3 text-sm text-ink bg-surface placeholder:text-ink-tertiary focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent leading-relaxed"
                 />
