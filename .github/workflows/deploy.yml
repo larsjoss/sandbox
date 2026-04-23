@@ -18,8 +18,20 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Build frontend
+        working-directory: story-generator/frontend
+        run: |
+          npm ci
+          npm run build
+
+      - name: Copy static frontend
+        run: |
+          mkdir -p story-generator/frontend/dist/story-generator/frontend-static
+          cp story-generator/frontend-static/index.html story-generator/frontend/dist/story-generator/frontend-static/index.html
+
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: story-generator/frontend-static
+          publish_dir: story-generator/frontend/dist
+          destination_dir: story-generator/frontend
