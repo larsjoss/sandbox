@@ -18,3 +18,7 @@ body {
   outline: 2px solid #1C2B1E;
   outline-offset: 2px;
 }
+
+/* Suppress browser-native password reveal/clear controls (Edge/IE) in favour of our custom toggle */
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear { display: none; }

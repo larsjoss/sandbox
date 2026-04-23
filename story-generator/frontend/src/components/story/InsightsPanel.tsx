@@ -26,9 +26,16 @@ export function InsightsPanel({ story, isLoading }: Props) {
         )}
 
         {!isLoading && !story && (
-          <p className="text-xs text-ink-tertiary text-center py-8 leading-relaxed">
-            KI-Hinweise erscheinen hier nach der Generierung.
-          </p>
+          <div className="flex flex-col items-center justify-center py-8 text-center gap-3">
+            <div className="w-9 h-9 bg-edge-2 rounded-xl flex items-center justify-center">
+              <svg className="w-4 h-4 text-ink-tertiary" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z" />
+              </svg>
+            </div>
+            <p className="text-xs text-ink-tertiary leading-relaxed">
+              KI-Hinweise erscheinen hier nach der Generierung.
+            </p>
+          </div>
         )}
 
         {!isLoading && story && !story.refinementHints && (

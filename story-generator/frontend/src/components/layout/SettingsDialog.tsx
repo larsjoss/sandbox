@@ -102,7 +102,7 @@ export function SettingsDialog({ open, onClose }: Props) {
               type="button"
               onClick={() => setShowKey((v) => !v)}
               aria-label={showKey ? 'API-Key verbergen' : 'API-Key anzeigen'}
-              className="absolute right-1 top-1/2 -translate-y-1/2 min-h-[44px] min-w-[44px] flex items-center justify-center text-ink-tertiary hover:text-ink-secondary rounded focus:outline-none focus:ring-2 focus:ring-brand"
+              className="absolute right-1 top-1/2 -translate-y-1/2 min-h-[44px] min-w-[44px] flex items-center justify-center text-ink-tertiary hover:text-ink-secondary rounded focus:outline-none focus:ring-2 focus:ring-brand bg-surface z-10"
             >
               {showKey ? <EyeOffIcon /> : <EyeIcon />}
             </button>
