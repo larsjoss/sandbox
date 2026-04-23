@@ -27,7 +27,7 @@ export function CopyButton({ text }: Props) {
       onClick={handleCopy}
       aria-label={copied ? 'Story kopiert' : 'Story kopieren'}
       aria-live="polite"
-      className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-1"
+      className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-ink-secondary bg-edge/60 hover:bg-edge rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-1"
     >
       {copied ? (
         <>
