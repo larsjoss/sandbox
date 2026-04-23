@@ -38,27 +38,32 @@ export function Sidebar() {
         <div className="p-4 border-b border-gray-100">
           <div className="flex items-center justify-between mb-3">
             <h1 className="text-sm font-semibold text-gray-900">Story Generator</h1>
-            <div className="flex items-center gap-2">
+
+            <div className="flex items-center gap-1">
               {apiKey && (
                 <span
                   aria-label="Anthropic API-Key aktiv"
-                  className="flex items-center gap-1 text-xs text-green-700 select-none"
+                  className="flex items-center gap-1 text-xs text-green-700 select-none mr-1"
                 >
                   <span className="w-2 h-2 rounded-full bg-green-500 shrink-0" aria-hidden="true" />
                   API verbunden
                 </span>
               )}
+
+              {/* Touch-Target: min 44×44 px (WCAG 2.5.5 AAA / 2.5.8 AA) */}
               <button
                 onClick={() => setSettingsOpen(true)}
                 aria-label="Einstellungen öffnen"
                 title="Einstellungen"
-                className="text-gray-400 hover:text-gray-600 transition-colors p-1 rounded focus:outline-none focus:ring-2 focus:ring-brand"
+                className="min-h-[44px] min-w-[44px] flex items-center justify-center text-gray-500 hover:text-gray-700 transition-colors rounded focus:outline-none focus:ring-2 focus:ring-brand"
               >
                 <SettingsIcon />
               </button>
+
+              {/* Touch-Target: min 44×44 px */}
               <button
                 onClick={handleLogout}
-                className="text-xs text-gray-400 hover:text-gray-600 transition-colors focus:outline-none focus:ring-2 focus:ring-brand rounded px-1"
+                className="min-h-[44px] px-3 flex items-center text-xs text-gray-500 hover:text-gray-700 transition-colors focus:outline-none focus:ring-2 focus:ring-brand rounded"
               >
                 Abmelden
               </button>
@@ -67,10 +72,11 @@ export function Sidebar() {
           <SearchBox onSearch={setQ} />
         </div>
 
-        <div className="flex-1 overflow-y-auto p-2 space-y-0.5">
+        <nav aria-label="Gespeicherte Stories" className="flex-1 overflow-y-auto p-2 space-y-0.5">
           {isLoading && (
             <div className="flex items-center justify-center py-8">
-              <div className="w-5 h-5 border-2 border-brand border-t-transparent rounded-full animate-spin" />
+              <div className="w-5 h-5 border-2 border-brand border-t-transparent rounded-full animate-spin" aria-hidden="true" />
+              <span className="sr-only">Wird geladen…</span>
             </div>
           )}
           {!isLoading && data?.stories.length === 0 && (
@@ -79,7 +85,7 @@ export function Sidebar() {
             </p>
           )}
           {data?.stories.map((story) => <StoryListItem key={story.id} story={story} />)}
-        </div>
+        </nav>
 
         <div className="p-3 border-t border-gray-100">
           <button

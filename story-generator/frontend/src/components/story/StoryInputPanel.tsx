@@ -39,20 +39,34 @@ export function StoryInputPanel({ activeStory, onGeneratingChange }: Props) {
 
   return (
     <div className="p-4 flex flex-col gap-4 min-h-full">
-      <div>
-        <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
+      <section aria-labelledby="anforderung-heading">
+        {/* text-gray-600 on white #fff ≈ 7.56:1 (WCAG AA ✓, vorher text-gray-400 ≈ 2.35:1 ✗) */}
+        <h2
+          id="anforderung-heading"
+          className="text-xs font-semibold text-gray-600 uppercase tracking-wider mb-3"
+        >
           Anforderung
         </h2>
 
         <form onSubmit={handleGenerate} className="space-y-3">
-          <textarea
-            value={rawInput}
-            onChange={(e) => setRawInput(e.target.value)}
-            placeholder="Beschreibe die Anforderung in deinen eigenen Worten — Slack-Nachricht, Sticky Note, spontane Idee…"
-            rows={8}
-            aria-label="Anforderung eingeben"
-            className="w-full resize-none border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent"
-          />
+          <div>
+            <label htmlFor="anforderung-input" className="sr-only">
+              Anforderung beschreiben
+            </label>
+            <textarea
+              id="anforderung-input"
+              value={rawInput}
+              onChange={(e) => setRawInput(e.target.value)}
+              placeholder="Anforderung eingeben…"
+              rows={8}
+              aria-describedby="anforderung-hint"
+              /* placeholder:text-gray-500 = #6b7280 on white #fff ≈ 4.83:1 (WCAG AA ✓) */
+              className="w-full resize-none border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-800 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent"
+            />
+            <p id="anforderung-hint" className="mt-1 text-xs text-gray-500">
+              Slack-Nachricht, Sticky Note oder spontane Idee — einfach in eigenen Worten beschreiben.
+            </p>
+          </div>
           <button
             type="submit"
             disabled={isGenerating || !rawInput.trim()}
@@ -72,22 +86,35 @@ export function StoryInputPanel({ activeStory, onGeneratingChange }: Props) {
             )}
           </button>
         </form>
-      </div>
+      </section>
 
       {activeStory && (
-        <div className="border-t border-gray-100 pt-4">
-          <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
+        <section aria-labelledby="refinement-heading" className="border-t border-gray-100 pt-4">
+          {/* text-gray-600 on white #fff ≈ 7.56:1 (WCAG AA ✓) */}
+          <h2
+            id="refinement-heading"
+            className="text-xs font-semibold text-gray-600 uppercase tracking-wider mb-3"
+          >
             Refinement-Anweisung
           </h2>
           <form onSubmit={handleRefine} className="space-y-3">
-            <textarea
-              value={refinementInstruction}
-              onChange={(e) => setRefinementInstruction(e.target.value)}
-              placeholder='z.B. "Mach AK-2 spezifischer" oder "Berücksichtige den Offline-Fall"'
-              rows={4}
-              aria-label="Refinement-Anweisung eingeben"
-              className="w-full resize-none border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent"
-            />
+            <div>
+              <label htmlFor="refinement-input" className="sr-only">
+                Refinement-Anweisung eingeben
+              </label>
+              <textarea
+                id="refinement-input"
+                value={refinementInstruction}
+                onChange={(e) => setRefinementInstruction(e.target.value)}
+                placeholder="Anweisung eingeben…"
+                rows={4}
+                aria-describedby="refinement-hint"
+                className="w-full resize-none border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-800 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent"
+              />
+              <p id="refinement-hint" className="mt-1 text-xs text-gray-500">
+                z.&thinsp;B. «Mach AK-2 spezifischer» oder «Berücksichtige den Offline-Fall»
+              </p>
+            </div>
             <button
               type="submit"
               disabled={isRefining || !refinementInstruction.trim()}
@@ -107,7 +134,7 @@ export function StoryInputPanel({ activeStory, onGeneratingChange }: Props) {
               )}
             </button>
           </form>
-        </div>
+        </section>
       )}
     </div>
   );

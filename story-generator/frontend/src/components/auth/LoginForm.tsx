@@ -1,5 +1,4 @@
 import { useState, FormEvent } from 'react';
-import axios from 'axios';
 import { useAuth } from '../../context/AuthContext';
 
 interface Props {
@@ -29,14 +28,15 @@ function RevealButton({ show, onToggle, label }: { show: boolean; onToggle: () =
       type="button"
       onClick={onToggle}
       aria-label={label}
-      className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-1 rounded focus:outline-none focus:ring-2 focus:ring-brand"
+      /* min 44×44 px Touch-Target; -m-1 kompensiert visuellen Überlauf */
+      className="absolute right-1 top-1/2 -translate-y-1/2 min-h-[44px] min-w-[44px] flex items-center justify-center -m-1 text-gray-500 hover:text-gray-700 rounded focus:outline-none focus:ring-2 focus:ring-brand"
     >
       {show ? <EyeOffIcon /> : <EyeIcon />}
     </button>
   );
 }
 
-export function LoginForm({ onSwitch }: Props) {
+export function LoginForm({ onSwitch: _onSwitch }: Props) {
   const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -53,11 +53,7 @@ export function LoginForm({ onSwitch }: Props) {
     try {
       await login(email, password, apiKey.trim() || undefined);
     } catch (err) {
-      if (axios.isAxiosError(err)) {
-        setError(err.response?.data?.error ?? 'Login fehlgeschlagen');
-      } else {
-        setError('Login fehlgeschlagen');
-      }
+      setError(err instanceof Error ? err.message : 'Login fehlgeschlagen');
     } finally {
       setLoading(false);
     }
@@ -75,10 +71,14 @@ export function LoginForm({ onSwitch }: Props) {
           required
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent"
+          /* placeholder:text-gray-500 = #6b7280 on white #fff ≈ 4.83:1 (WCAG AA ✓) */
+          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent placeholder:text-gray-500"
           placeholder="name@beispiel.de"
           autoComplete="email"
         />
+        <p className="mt-1 text-xs text-gray-500" id="login-email-hint">
+          Format: name@beispiel.de
+        </p>
       </div>
 
       <div>
@@ -92,9 +92,10 @@ export function LoginForm({ onSwitch }: Props) {
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent"
-            placeholder="••••••••"
+            className="w-full border border-gray-300 rounded-lg px-3 py-2 pr-12 text-sm focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent placeholder:text-gray-500"
+            placeholder="Passwort eingeben"
             autoComplete="current-password"
+            aria-describedby="login-password-hint"
           />
           <RevealButton
             show={showPassword}
@@ -102,6 +103,9 @@ export function LoginForm({ onSwitch }: Props) {
             label={showPassword ? 'Passwort verbergen' : 'Passwort anzeigen'}
           />
         </div>
+        <p className="mt-1 text-xs text-gray-500" id="login-password-hint">
+          Mindestens 8 Zeichen
+        </p>
       </div>
 
       <div>
@@ -114,9 +118,10 @@ export function LoginForm({ onSwitch }: Props) {
             type={showApiKey ? 'text' : 'password'}
             value={apiKey}
             onChange={(e) => setApiKey(e.target.value)}
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent"
+            className="w-full border border-gray-300 rounded-lg px-3 py-2 pr-12 text-sm focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent placeholder:text-gray-500"
             placeholder="sk-ant-…"
             autoComplete="off"
+            aria-describedby="login-apikey-hint"
           />
           <RevealButton
             show={showApiKey}
@@ -124,8 +129,8 @@ export function LoginForm({ onSwitch }: Props) {
             label={showApiKey ? 'API-Key verbergen' : 'API-Key anzeigen'}
           />
         </div>
-        <p className="mt-1.5 text-xs text-gray-500">
-          Deinen API-Key findest du unter{' '}
+        <p className="mt-1 text-xs text-gray-500" id="login-apikey-hint">
+          Beginnt mit «sk-ant-». Findest du unter{' '}
           <a
             href="https://console.anthropic.com"
             target="_blank"
@@ -150,7 +155,6 @@ export function LoginForm({ onSwitch }: Props) {
       >
         {loading ? 'Anmelden…' : 'Anmelden'}
       </button>
-
     </form>
   );
 }

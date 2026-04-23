@@ -68,7 +68,8 @@ export function StoryOutputPanel({ story, isLoading, isGenerating }: Props) {
   return (
     <div className="flex flex-col h-full">
       <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
-        <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Story</h2>
+        {/* text-gray-600 on white #fff ≈ 7.56:1 (WCAG AA ✓, vorher text-gray-400 ≈ 2.35:1 ✗) */}
+        <h2 className="text-xs font-semibold text-gray-600 uppercase tracking-wider">Story</h2>
         {story && <CopyButton text={story.generatedStory} />}
       </div>
 
