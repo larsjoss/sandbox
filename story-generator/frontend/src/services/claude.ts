@@ -21,7 +21,11 @@ Dein Output folgt IMMER exakt diesem Template — ohne Abweichungen:
 [Links aus dem Input unverändert übernehmen. Kontext, Annahmen, technische Hinweise.]
 
 **Refinement Hinweise**
-[Fehlende Informationen, Warnungen und Empfehlungen für das Refinement-Meeting. Wenn keine vorhanden: "Keine offenen Punkte identifiziert."]`;
+Jeden Punkt exakt mit einer dieser Kategorien am Zeilenanfang (Kategorie fett, dann Doppelpunkt, dann Text):
+- **KRITISCH:** [Punkt, der für das Refinement unbedingt geklärt werden muss]
+- **WICHTIG:** [Punkt, der wichtig aber nicht blockierend ist]
+- **EMPFEHLUNG:** [Empfehlung zur Implementierung oder Vorgehensweise]
+Wenn keine Punkte vorhanden: "Keine offenen Punkte identifiziert."`;
 
 export interface ConversationMessage {
   role: 'user' | 'assistant';

@@ -2,7 +2,7 @@ name: Deploy Story Generator
 
 on:
   push:
-    branches: [main]
+    branches: [main, claude/improve-accessibility-responsive-I5fjq]
     paths:
       - 'story-generator/frontend/**'
       - 'story-generator/frontend-static/**'
