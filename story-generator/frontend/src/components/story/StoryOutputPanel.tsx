@@ -72,13 +72,21 @@ export function StoryOutputPanel({ story, isLoading, isGenerating }: Props) {
         {story && <CopyButton text={story.generatedStory} />}
       </div>
 
+      {/*
+       * WCAG 2.4.7 – Focus Visible (AA)
+       * tabIndex={-1}: nur programmatisch fokussierbar (nicht per Tab erreichbar).
+       * outline-none ist hier legitim, da kein Tastatur-Nutzer diesen Fokus
+       * selbst auslösen kann. focus-visible:ring zeigt trotzdem einen Ring,
+       * falls Browser :focus-visible bei programmatischem Fokus auslöst.
+       * WCAG 1.3.1 – aria-label benennt den Bereich für Screenreader.
+       */}
       <div
         ref={outputRef}
         tabIndex={-1}
         aria-busy={busy}
         aria-live="polite"
         aria-label="Generierte Story"
-        className="flex-1 overflow-y-auto px-6 py-4 focus:outline-none"
+        className="flex-1 overflow-y-auto px-6 py-4 outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-inset"
       >
         {busy && !story && (
           <div className="animate-pulse space-y-3" aria-hidden="true">
