@@ -1,7 +1,6 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import rehypeSanitize from 'rehype-sanitize';
-import { CopyButton } from './CopyButton';
 import type { Story } from '../../types';
 
 interface Props {
@@ -38,6 +37,7 @@ function Skeleton() {
 export function StoryOutputPanel({ story, isLoading, isGenerating }: Props) {
   const outputRef = useRef<HTMLDivElement>(null);
   const wasGenerating = useRef(false);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     if (wasGenerating.current && !isGenerating && story) {
@@ -45,6 +45,17 @@ export function StoryOutputPanel({ story, isLoading, isGenerating }: Props) {
     }
     wasGenerating.current = isGenerating ?? false;
   }, [isGenerating, story]);
+
+  const handleCopy = async () => {
+    if (!story) return;
+    try {
+      await navigator.clipboard.writeText(story.generatedStory);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      alert('Kopieren fehlgeschlagen. Bitte manuell kopieren.');
+    }
+  };
 
   if (isLoading) {
     return (
@@ -73,9 +84,8 @@ export function StoryOutputPanel({ story, isLoading, isGenerating }: Props) {
 
   return (
     <div className="flex flex-col h-full">
-      <div className="flex items-center justify-between px-5 py-3.5 border-b border-edge">
+      <div className="px-5 py-3.5 border-b border-edge shrink-0">
         <h2 className="text-xs font-semibold text-ink-secondary uppercase tracking-widest">Story</h2>
-        {story && <CopyButton text={story.generatedStory} />}
       </div>
 
       {/*
@@ -110,6 +120,38 @@ export function StoryOutputPanel({ story, isLoading, isGenerating }: Props) {
           </div>
         )}
       </div>
+
+      {/* Primary copy button — shown only when a story exists */}
+      {story && (
+        <div className="px-5 py-3.5 border-t border-edge shrink-0">
+          {/*
+           * WCAG 4.1.2 – aria-label benennt die Aktion; aria-live="polite" meldet Zustandsänderung.
+           * WCAG 2.4.7 – Focus Visible: expliziter Fokus-Ring.
+           */}
+          <button
+            onClick={handleCopy}
+            aria-label={copied ? 'Story kopiert' : 'Story kopieren'}
+            aria-live="polite"
+            className="w-full bg-brand hover:bg-brand-dark text-white font-medium py-2.5 rounded-lg transition-colors flex items-center justify-center gap-2 focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-2 focus:ring-offset-canvas"
+          >
+            {copied ? (
+              <>
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                Kopiert!
+              </>
+            ) : (
+              <>
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                </svg>
+                Kopieren
+              </>
+            )}
+          </button>
+        </div>
+      )}
     </div>
   );
 }
