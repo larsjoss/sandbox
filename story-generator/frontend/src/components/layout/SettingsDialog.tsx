@@ -93,11 +93,16 @@ export function SettingsDialog({ open, onClose }: Props) {
               className="w-full border border-gray-300 rounded-lg px-3 py-2 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent"
               onKeyDown={(e) => e.key === 'Enter' && handleSave()}
             />
+            {/*
+             * WCAG 2.5.5 – Target Size (AA): min-h/min-w 44 px für Touch-Ziele.
+             * WCAG 2.4.7 – Focus Visible: expliziter Fokus-Ring.
+             * WCAG 4.1.2 – Name, Role, Value: aria-label beschreibt den Zustand.
+             */}
             <button
               type="button"
               onClick={() => setShowKey((v) => !v)}
               aria-label={showKey ? 'API-Key verbergen' : 'API-Key anzeigen'}
-              className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-1 rounded focus:outline-none focus:ring-2 focus:ring-brand"
+              className="absolute right-1 top-1/2 -translate-y-1/2 min-h-[44px] min-w-[44px] flex items-center justify-center text-gray-400 hover:text-gray-600 rounded focus:outline-none focus:ring-2 focus:ring-brand"
             >
               {showKey ? <EyeOffIcon /> : <EyeIcon />}
             </button>
@@ -115,11 +120,12 @@ export function SettingsDialog({ open, onClose }: Props) {
           </p>
         </div>
 
+        {/* WCAG 2.4.7 – Focus Visible: explizite Fokus-Ringe auf beiden Dialog-Buttons */}
         <div className="flex gap-2 mt-5">
           <button
             type="button"
             onClick={onClose}
-            className="flex-1 border border-gray-300 text-gray-700 font-medium py-2 rounded-lg text-sm hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-brand"
+            className="flex-1 border border-gray-300 text-gray-700 font-medium py-2 rounded-lg text-sm hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-2"
           >
             Abbrechen
           </button>

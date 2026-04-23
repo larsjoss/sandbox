@@ -5,3 +5,21 @@
 body {
   @apply bg-gray-50 text-gray-900 antialiased;
 }
+
+/*
+ * WCAG 2.4.7 – Focus Visible (AA) / WCAG 2.4.11 – Focus Appearance (AA, WCAG 2.2)
+ *
+ * Globaler Fallback-Fokus-Ring für interaktive Elemente ohne expliziten
+ * Fokus-Stil. Gilt nur bei Tastatur-Navigation (:focus-visible), nicht
+ * bei Maus-Klick.
+ *
+ * Farbe: brand #6366f1 auf Weiss #fff ≈ 4.47:1 Kontrast (> 3:1 gemäss
+ * WCAG 2.4.11 für Fokus-Indikatoren).
+ *
+ * Komponenten mit explizitem focus:ring-* überschreiben diesen Stil
+ * automatisch (Tailwind :focus-Klassen haben höhere Spezifität).
+ */
+:focus-visible {
+  outline: 2px solid #6366f1;
+  outline-offset: 2px;
+}

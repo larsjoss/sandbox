@@ -67,11 +67,12 @@ export function StoryInputPanel({ activeStory, onGeneratingChange }: Props) {
               Slack-Nachricht, Sticky Note oder spontane Idee — einfach in eigenen Worten beschreiben.
             </p>
           </div>
+          {/* WCAG 2.4.7 – Focus Visible: expliziter Fokus-Ring für Submit-Button */}
           <button
             type="submit"
             disabled={isGenerating || !rawInput.trim()}
             aria-busy={isGenerating}
-            className="w-full bg-brand hover:bg-brand-dark text-white font-medium py-2.5 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            className="w-full bg-brand hover:bg-brand-dark text-white font-medium py-2.5 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-2"
           >
             {isGenerating ? (
               <>
@@ -115,11 +116,12 @@ export function StoryInputPanel({ activeStory, onGeneratingChange }: Props) {
                 z.&thinsp;B. «Mach AK-2 spezifischer» oder «Berücksichtige den Offline-Fall»
               </p>
             </div>
+            {/* WCAG 2.4.7 – Focus Visible: expliziter Fokus-Ring */}
             <button
               type="submit"
               disabled={isRefining || !refinementInstruction.trim()}
               aria-busy={isRefining}
-              className="w-full bg-white border border-brand text-brand hover:bg-brand-light font-medium py-2.5 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="w-full bg-white border border-brand text-brand hover:bg-brand-light font-medium py-2.5 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-2"
             >
               {isRefining ? (
                 <>
