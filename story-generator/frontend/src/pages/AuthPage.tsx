@@ -10,8 +10,9 @@ export function AuthPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="w-6 h-6 border-2 border-brand border-t-transparent rounded-full animate-spin" />
+      <div className="min-h-screen flex items-center justify-center" aria-busy="true">
+        <div className="w-6 h-6 border-2 border-brand border-t-transparent rounded-full animate-spin" aria-hidden="true" />
+        <span className="sr-only">Wird geladen…</span>
       </div>
     );
   }
@@ -20,7 +21,7 @@ export function AuthPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-      <div className="w-full max-w-sm">
+      <main className="w-full max-w-sm" aria-label="Anmeldung">
         <div className="text-center mb-8">
           <h1 className="text-2xl font-bold text-gray-900">Story Generator</h1>
           <p className="text-sm text-gray-500 mt-1">Anforderungen in Stories verwandeln</p>
@@ -36,7 +37,7 @@ export function AuthPage() {
             <RegisterForm onSwitch={() => setMode('login')} />
           )}
         </div>
-      </div>
+      </main>
     </div>
   );
 }
