@@ -59,14 +59,6 @@ export function Sidebar() {
               >
                 <SettingsIcon />
               </button>
-
-              {/* Touch-Target: min 44×44 px */}
-              <button
-                onClick={handleLogout}
-                className="min-h-[44px] px-3 flex items-center text-xs text-gray-500 hover:text-gray-700 transition-colors focus:outline-none focus:ring-2 focus:ring-brand rounded"
-              >
-                Abmelden
-              </button>
             </div>
           </div>
           <SearchBox onSearch={setQ} />
@@ -87,7 +79,7 @@ export function Sidebar() {
           {data?.stories.map((story) => <StoryListItem key={story.id} story={story} />)}
         </nav>
 
-        <div className="p-3 border-t border-gray-100">
+        <div className="p-3 border-t border-gray-100 flex flex-col gap-2">
           <button
             onClick={() => navigate('/')}
             className="w-full flex items-center gap-2 px-3 py-2 text-sm font-medium text-brand bg-brand-light hover:bg-indigo-200 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-brand"
@@ -96,6 +88,13 @@ export function Sidebar() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
             </svg>
             Neue Story
+          </button>
+          {/* Abmelden im Footer – genug Platz, kein Abschneiden im Header */}
+          <button
+            onClick={handleLogout}
+            className="w-full px-3 py-2 text-sm text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-brand text-left"
+          >
+            Abmelden
           </button>
         </div>
       </aside>

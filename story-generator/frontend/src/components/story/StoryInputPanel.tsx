@@ -16,6 +16,8 @@ export function StoryInputPanel({ activeStory, onGeneratingChange }: Props) {
 
   const isGenerating = generateStory.isPending;
   const isRefining = refineStory.isPending;
+  const generateError = generateStory.error;
+  const refineError = refineStory.error;
 
   useEffect(() => {
     onGeneratingChange?.(isGenerating);
@@ -67,6 +69,11 @@ export function StoryInputPanel({ activeStory, onGeneratingChange }: Props) {
               Slack-Nachricht, Sticky Note oder spontane Idee — einfach in eigenen Worten beschreiben.
             </p>
           </div>
+          {generateError && (
+            <p role="alert" className="text-xs text-red-600 bg-red-50 border border-red-200 rounded px-3 py-2">
+              {generateError instanceof Error ? generateError.message : 'Fehler beim Generieren.'}
+            </p>
+          )}
           {/* WCAG 2.4.7 – Focus Visible: expliziter Fokus-Ring für Submit-Button */}
           <button
             type="submit"
@@ -116,6 +123,11 @@ export function StoryInputPanel({ activeStory, onGeneratingChange }: Props) {
                 z.&thinsp;B. «Mach AK-2 spezifischer» oder «Berücksichtige den Offline-Fall»
               </p>
             </div>
+            {refineError && (
+              <p role="alert" className="text-xs text-red-600 bg-red-50 border border-red-200 rounded px-3 py-2">
+                {refineError instanceof Error ? refineError.message : 'Fehler beim Verfeinern.'}
+              </p>
+            )}
             {/* WCAG 2.4.7 – Focus Visible: expliziter Fokus-Ring */}
             <button
               type="submit"
