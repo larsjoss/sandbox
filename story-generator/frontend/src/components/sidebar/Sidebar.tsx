@@ -34,18 +34,18 @@ export function Sidebar() {
 
   return (
     <>
-      <aside className="flex flex-col h-full border-r border-gray-200 bg-white">
-        <div className="p-4 border-b border-gray-100">
-          <div className="flex items-center justify-between mb-3">
-            <h1 className="text-sm font-semibold text-gray-900">Story Generator</h1>
+      <aside className="flex flex-col h-full">
+        <div className="px-4 pt-5 pb-4 border-b border-edge">
+          <div className="flex items-center justify-between mb-4">
+            <h1 className="font-serif text-base font-semibold text-ink">Story Generator</h1>
 
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-0.5">
               {apiKey && (
                 <span
                   aria-label="Anthropic API-Key aktiv"
-                  className="flex items-center gap-1 text-xs text-green-700 select-none mr-1"
+                  className="flex items-center gap-1.5 text-xs text-green-700 select-none mr-1"
                 >
-                  <span className="w-2 h-2 rounded-full bg-green-500 shrink-0" aria-hidden="true" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-green-500 shrink-0" aria-hidden="true" />
                   API verbunden
                 </span>
               )}
@@ -55,7 +55,7 @@ export function Sidebar() {
                 onClick={() => setSettingsOpen(true)}
                 aria-label="Einstellungen öffnen"
                 title="Einstellungen"
-                className="min-h-[44px] min-w-[44px] flex items-center justify-center text-gray-500 hover:text-gray-700 transition-colors rounded focus:outline-none focus:ring-2 focus:ring-brand"
+                className="min-h-[44px] min-w-[44px] flex items-center justify-center text-ink-tertiary hover:text-ink transition-colors rounded focus:outline-none focus:ring-2 focus:ring-brand"
               >
                 <SettingsIcon />
               </button>
@@ -67,32 +67,31 @@ export function Sidebar() {
         <nav aria-label="Gespeicherte Stories" className="flex-1 overflow-y-auto p-2 space-y-0.5">
           {isLoading && (
             <div className="flex items-center justify-center py-8">
-              <div className="w-5 h-5 border-2 border-brand border-t-transparent rounded-full animate-spin" aria-hidden="true" />
+              <div className="w-4 h-4 border-2 border-brand border-t-transparent rounded-full animate-spin" aria-hidden="true" />
               <span className="sr-only">Wird geladen…</span>
             </div>
           )}
           {!isLoading && data?.stories.length === 0 && (
-            <p className="text-xs text-gray-400 text-center py-8 px-3">
-              {q ? 'Keine Stories gefunden.' : 'Noch keine Stories. Erstelle deine erste!'}
+            <p className="text-xs text-ink-tertiary text-center py-8 px-3 leading-relaxed">
+              {q ? 'Keine Stories gefunden.' : 'Noch keine Stories.\nErstelle deine erste!'}
             </p>
           )}
           {data?.stories.map((story) => <StoryListItem key={story.id} story={story} />)}
         </nav>
 
-        <div className="p-3 border-t border-gray-100 flex flex-col gap-2">
+        <div className="p-3 border-t border-edge flex flex-col gap-1.5">
           <button
             onClick={() => navigate('/')}
-            className="w-full flex items-center gap-2 px-3 py-2 text-sm font-medium text-brand bg-brand-light hover:bg-indigo-200 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-brand"
+            className="w-full flex items-center gap-2 px-3 py-2.5 text-sm font-medium text-brand bg-brand-light hover:bg-brand-light/70 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-brand"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
             </svg>
             Neue Story
           </button>
-          {/* Abmelden im Footer – genug Platz, kein Abschneiden im Header */}
           <button
             onClick={handleLogout}
-            className="w-full px-3 py-2 text-sm text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-brand text-left"
+            className="w-full px-3 py-2 text-sm text-ink-tertiary hover:text-ink hover:bg-edge-2 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-brand text-left"
           >
             Abmelden
           </button>

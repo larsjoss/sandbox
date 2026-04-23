@@ -19,11 +19,8 @@ function formatDate(dateStr: string): string {
 }
 
 /*
- * WCAG 4.1.1 – Parsing (A): Ein <button> darf keine anderen interaktiven
- * Elemente (z.B. weiteren <button>) enthalten. Vorher war der Löschen-Button
- * ein Kind des Navigations-Buttons → invalides HTML.
- * Fix: Äusseres Element ist nun ein <div role="listitem"> mit relativem
- * Positioning. Navigations-Button und Löschen-Button sind Geschwister.
+ * WCAG 4.1.1 – kein <button> in <button>: Wrapper ist <div>,
+ * Navigations-Button und Löschen-Button sind Geschwister.
  */
 export function StoryListItem({ story }: Props) {
   const navigate = useNavigate();
@@ -43,34 +40,27 @@ export function StoryListItem({ story }: Props) {
   };
 
   return (
-    /*
-     * WCAG 4.1.1 – kein <button> in <button>: Wrapper ist <div>,
-     * Navigations-Button und Löschen-Button sind Geschwister.
-     */
     <div className="relative group">
       {/*
        * WCAG 2.4.7 – Focus Visible: expliziter Fokus-Ring.
-       * WCAG 4.1.2 – Name, Role, Value: aria-label mit Story-Titel,
-       * aria-current für aktive Story.
+       * WCAG 4.1.2 – aria-label + aria-current für aktive Story.
        */}
       <button
         onClick={() => navigate(`/stories/${story.id}`)}
         aria-label={`Story öffnen: ${story.title}`}
         aria-current={isActive ? 'page' : undefined}
         className={`w-full text-left px-3 py-2.5 rounded-lg transition-colors pr-9 focus:outline-none focus:ring-2 focus:ring-brand focus:ring-inset ${
-          isActive ? 'bg-brand-light text-brand-dark' : 'hover:bg-gray-100 text-gray-700'
+          isActive
+            ? 'bg-brand-light text-brand'
+            : 'hover:bg-edge-2 text-ink'
         }`}
       >
-        <span className="text-sm font-medium line-clamp-2 block">{story.title}</span>
-        {/* WCAG 1.3.1 – dekorativ: Datum hat keine Icon-SVG, nur Text */}
-        <p className="text-xs text-gray-500 mt-1">{formatDate(story.updatedAt)}</p>
+        <span className="text-sm font-medium line-clamp-2 block leading-snug">{story.title}</span>
+        <p className="text-xs text-ink-tertiary mt-1">{formatDate(story.updatedAt)}</p>
       </button>
 
       {/*
-       * WCAG 2.4.7 – Focus Visible: opacity-0 per default, aber
-       * sichtbar bei Hover UND bei Tastatur-Fokus (focus:opacity-100).
-       * Ohne focus:opacity-100 wäre der Button für Tastatur-Nutzer
-       * unsichtbar-aber-fokussierbar → WCAG-Verstoß.
+       * WCAG 2.4.7 – focus:opacity-100 damit der Button per Tastatur sichtbar bleibt.
        * WCAG 1.3.1 – aria-hidden auf dekorativem Trash-Icon.
        * WCAG 4.1.2 – aria-label beschreibt die Aktion mit Story-Titel.
        */}
@@ -81,12 +71,11 @@ export function StoryListItem({ story }: Props) {
           absolute right-1.5 top-1/2 -translate-y-1/2
           opacity-0 group-hover:opacity-100 focus:opacity-100
           p-1.5 rounded
-          text-gray-400 hover:text-red-500
+          text-ink-tertiary hover:text-red-600
           transition-all
           focus:outline-none focus:ring-2 focus:ring-red-400
         "
       >
-        {/* WCAG 1.3.1 – dekoratives Icon, Bedeutung via aria-label des Buttons */}
         <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
           <path
             strokeLinecap="round"

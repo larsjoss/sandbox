@@ -24,7 +24,7 @@ function RevealButton({ show, onToggle, label }: { show: boolean; onToggle: () =
       type="button"
       onClick={onToggle}
       aria-label={label}
-      className="absolute right-1 top-1/2 -translate-y-1/2 min-h-[44px] min-w-[44px] flex items-center justify-center -m-1 text-gray-500 hover:text-gray-700 rounded focus:outline-none focus:ring-2 focus:ring-brand"
+      className="absolute right-1 top-1/2 -translate-y-1/2 min-h-[44px] min-w-[44px] flex items-center justify-center -m-1 text-ink-tertiary hover:text-ink-secondary rounded focus:outline-none focus:ring-2 focus:ring-brand"
     >
       {show ? <EyeOffIcon /> : <EyeIcon />}
     </button>
@@ -55,9 +55,9 @@ export function LoginForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-5">
       <div>
-        <label htmlFor="login-email" className="block text-sm font-medium text-gray-700 mb-1">
+        <label htmlFor="login-email" className="block text-sm font-medium text-ink mb-1.5">
           E-Mail
         </label>
         <input
@@ -66,14 +66,14 @@ export function LoginForm() {
           required
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent placeholder:text-gray-500"
+          className="w-full border border-edge rounded-lg px-3.5 py-2.5 text-sm text-ink bg-surface focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent placeholder:text-ink-tertiary"
           placeholder="name@beispiel.de"
           autoComplete="email"
         />
       </div>
 
       <div>
-        <label htmlFor="login-password" className="block text-sm font-medium text-gray-700 mb-1">
+        <label htmlFor="login-password" className="block text-sm font-medium text-ink mb-1.5">
           Passwort
         </label>
         <div className="relative">
@@ -83,7 +83,7 @@ export function LoginForm() {
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 pr-12 text-sm focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent placeholder:text-gray-500"
+            className="w-full border border-edge rounded-lg px-3.5 py-2.5 pr-12 text-sm text-ink bg-surface focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent placeholder:text-ink-tertiary"
             placeholder="Passwort eingeben"
             autoComplete="current-password"
           />
@@ -96,7 +96,7 @@ export function LoginForm() {
       </div>
 
       <div>
-        <label htmlFor="login-apikey" className="block text-sm font-medium text-gray-700 mb-1">
+        <label htmlFor="login-apikey" className="block text-sm font-medium text-ink mb-1.5">
           Anthropic API-Key
         </label>
         <div className="relative">
@@ -105,7 +105,7 @@ export function LoginForm() {
             type={showApiKey ? 'text' : 'password'}
             value={apiKey}
             onChange={(e) => setApiKey(e.target.value)}
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 pr-12 text-sm focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent placeholder:text-gray-500"
+            className="w-full border border-edge rounded-lg px-3.5 py-2.5 pr-12 text-sm text-ink bg-surface focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent placeholder:text-ink-tertiary"
             placeholder="sk-ant-…"
             autoComplete="off"
             aria-describedby="login-apikey-hint"
@@ -116,7 +116,7 @@ export function LoginForm() {
             label={showApiKey ? 'API-Key verbergen' : 'API-Key anzeigen'}
           />
         </div>
-        <p className="mt-1 text-xs text-gray-500" id="login-apikey-hint">
+        <p className="mt-1.5 text-xs text-ink-tertiary" id="login-apikey-hint">
           Beginnt mit «sk-ant-». Findest du unter{' '}
           <a
             href="https://console.anthropic.com"
@@ -130,7 +130,7 @@ export function LoginForm() {
       </div>
 
       {error && (
-        <p role="alert" className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+        <p role="alert" className="text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg px-3.5 py-2.5">
           {error}
         </p>
       )}
@@ -138,7 +138,7 @@ export function LoginForm() {
       <button
         type="submit"
         disabled={loading}
-        className="w-full bg-brand hover:bg-brand-dark text-white font-medium py-2 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-2"
+        className="w-full bg-brand hover:bg-brand-dark text-white font-medium py-2.5 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-2 focus:ring-offset-surface mt-2"
       >
         {loading ? 'Anmelden…' : 'Anmelden'}
       </button>
