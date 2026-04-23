@@ -32,8 +32,8 @@ export function SearchBox({ onSearch }: Props) {
         type="search"
         value={value}
         onChange={handleChange}
-        placeholder="Stories durchsuchen…"
-        aria-label="Stories durchsuchen"
+        placeholder="Storys durchsuchen…"
+        aria-label="Storys durchsuchen"
         className="w-full pl-8 pr-3 py-2 text-sm border border-edge rounded-lg bg-canvas text-ink focus:outline-none focus:ring-2 focus:ring-brand focus:bg-surface placeholder:text-ink-tertiary"
       />
     </div>

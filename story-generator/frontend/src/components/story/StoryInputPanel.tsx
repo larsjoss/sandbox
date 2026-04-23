@@ -58,14 +58,10 @@ export function StoryInputPanel({ activeStory, onGeneratingChange }: Props) {
               id="anforderung-input"
               value={rawInput}
               onChange={(e) => setRawInput(e.target.value)}
-              placeholder="Anforderung eingeben…"
+              placeholder="Slack-Nachricht, Sticky Note oder spontane Idee — einfach in eigenen Worten beschreiben."
               rows={8}
-              aria-describedby="anforderung-hint"
               className="w-full resize-none border border-edge rounded-lg px-3.5 py-3 text-sm text-ink bg-surface placeholder:text-ink-tertiary focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent leading-relaxed"
             />
-            <p id="anforderung-hint" className="mt-1.5 text-xs text-ink-tertiary leading-relaxed">
-              Slack-Nachricht, Sticky Note oder spontane Idee — einfach in eigenen Worten beschreiben.
-            </p>
           </div>
 
           {generateError && (
@@ -110,14 +106,10 @@ export function StoryInputPanel({ activeStory, onGeneratingChange }: Props) {
                 id="refinement-input"
                 value={refinementInstruction}
                 onChange={(e) => setRefinementInstruction(e.target.value)}
-                placeholder="Anweisung eingeben…"
+                placeholder="z. B. «Mach AK-2 spezifischer» oder «Berücksichtige den Offline-Fall»"
                 rows={4}
-                aria-describedby="refinement-hint"
                 className="w-full resize-none border border-edge rounded-lg px-3.5 py-3 text-sm text-ink bg-surface placeholder:text-ink-tertiary focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent leading-relaxed"
               />
-              <p id="refinement-hint" className="mt-1.5 text-xs text-ink-tertiary">
-                z.&thinsp;B. «Mach AK-2 spezifischer» oder «Berücksichtige den Offline-Fall»
-              </p>
             </div>
 
             {refineError && (
