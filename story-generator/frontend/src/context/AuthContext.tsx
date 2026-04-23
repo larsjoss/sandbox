@@ -9,12 +9,10 @@ const ALLOWED_PASSWORD = 'Test1234';
 
 interface AuthContextType {
   user: User | null;
-  loading: boolean;
   apiKey: string | null;
   setApiKey: (key: string) => void;
   login: (email: string, password: string, apiKey?: string) => Promise<void>;
-  register: (email: string, password: string) => Promise<void>;
-  logout: () => Promise<void>;
+  logout: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -48,11 +46,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (apiKeyParam) setApiKey(apiKeyParam);
   };
 
-  const register = async (_email: string, _password: string): Promise<void> => {
-    throw new Error('Registrierung ist in dieser Version nicht verfügbar');
-  };
-
-  const logout = async () => {
+  const logout = () => {
     sessionStorage.removeItem(SESSION_USER_KEY);
     sessionStorage.removeItem(API_KEY_SESSION_KEY);
     setApiKeyState(null);
@@ -60,7 +54,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading: false, apiKey, setApiKey, login, register, logout }}>
+    <AuthContext.Provider value={{ user, apiKey, setApiKey, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

@@ -1,4 +1,5 @@
 import Anthropic from '@anthropic-ai/sdk';
+import type { TextBlock } from '@anthropic-ai/sdk/resources/messages';
 
 const API_KEY_SESSION_KEY = 'anthropic_api_key';
 
@@ -60,8 +61,8 @@ export async function generateStory(
     messages: [{ role: 'user', content: rawInput }],
   });
   const text = response.content
-    .filter((b) => b.type === 'text')
-    .map((b) => (b as { type: 'text'; text: string }).text)
+    .filter((b): b is TextBlock => b.type === 'text')
+    .map((b) => b.text)
     .join('');
   return parseOutput(text);
 }
@@ -77,8 +78,8 @@ export async function refineStory(
     messages: conversationHistory,
   });
   const text = response.content
-    .filter((b) => b.type === 'text')
-    .map((b) => (b as { type: 'text'; text: string }).text)
+    .filter((b): b is TextBlock => b.type === 'text')
+    .map((b) => b.text)
     .join('');
   return parseOutput(text);
 }

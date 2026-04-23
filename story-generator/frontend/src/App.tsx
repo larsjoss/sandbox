@@ -18,21 +18,7 @@ import { WorkspacePage } from './pages/WorkspacePage';
 // Tab-Flow (Mobile): Skip-Link → Sidebar-Header-Buttons → Tab-Buttons (Arrow-Key-Navigation) → aktives Panel
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { user, loading } = useAuth();
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        {/* WCAG 1.3.1 – aria-hidden auf dekorativen Spinner */}
-        <div
-          className="w-6 h-6 border-2 border-brand border-t-transparent rounded-full animate-spin"
-          aria-hidden="true"
-        />
-        <span className="sr-only">Wird geladen…</span>
-      </div>
-    );
-  }
-
+  const { user } = useAuth();
   if (!user) return <Navigate to="/auth" replace />;
   return <>{children}</>;
 }
