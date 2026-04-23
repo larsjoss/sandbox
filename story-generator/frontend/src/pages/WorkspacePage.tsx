@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { AppShell } from '../components/layout/AppShell';
 import { StoryInputPanel } from '../components/story/StoryInputPanel';
@@ -8,13 +9,25 @@ import { useStory } from '../hooks/useStory';
 export function WorkspacePage() {
   const { id } = useParams<{ id?: string }>();
   const { data, isLoading } = useStory(id);
+  const [isGenerating, setIsGenerating] = useState(false);
 
   const story = data?.story;
 
   return (
     <AppShell
-      leftPanel={<StoryInputPanel activeStory={story} />}
-      centerPanel={<StoryOutputPanel story={story} isLoading={isLoading && !!id} />}
+      leftPanel={
+        <StoryInputPanel
+          activeStory={story}
+          onGeneratingChange={setIsGenerating}
+        />
+      }
+      centerPanel={
+        <StoryOutputPanel
+          story={story}
+          isLoading={isLoading && !!id}
+          isGenerating={isGenerating}
+        />
+      }
       rightPanel={<InsightsPanel story={story} isLoading={isLoading && !!id} />}
     />
   );

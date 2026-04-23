@@ -1,8 +1,18 @@
 import axios from 'axios';
 
+const API_KEY_SESSION_KEY = 'anthropic_api_key';
+
 const client = axios.create({
   baseURL: '/api',
   withCredentials: true,
+});
+
+client.interceptors.request.use((config) => {
+  const apiKey = sessionStorage.getItem(API_KEY_SESSION_KEY);
+  if (apiKey) {
+    config.headers['X-Anthropic-Api-Key'] = apiKey;
+  }
+  return config;
 });
 
 client.interceptors.response.use(
