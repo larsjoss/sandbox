@@ -36,28 +36,28 @@ export function AppShell({ leftPanel, centerPanel, rightPanel }: Props) {
 
   return (
     <div className="h-screen overflow-hidden flex flex-col">
-      {/* Mobile: Sidebar-Strip als sichtbarer Seitenkopf */}
-      <div className="md:hidden shrink-0 border-b border-gray-200 bg-white">
+      {/* Mobile: Sidebar-Strip */}
+      <div className="md:hidden shrink-0 border-b border-edge bg-surface">
         <Sidebar />
       </div>
 
       <div className="flex flex-1 overflow-hidden">
-        {/* Desktop-Sidebar (aside = ergänzender Navigationsbereich) */}
-        <div className="hidden md:flex md:flex-col md:w-64 shrink-0 border-r border-gray-200 bg-white overflow-hidden">
+        {/* Desktop-Sidebar */}
+        <div className="hidden md:flex md:flex-col md:w-64 shrink-0 border-r border-edge bg-surface overflow-hidden">
           <Sidebar />
         </div>
 
         {/* Hauptinhalt */}
         <main id="main-content" className="flex flex-col flex-1 overflow-hidden">
-          {/* Desktop: drei Spalten nebeneinander */}
+          {/* Desktop: drei Spalten */}
           <div className="hidden md:flex flex-1 overflow-hidden h-full">
-            <div className="w-80 shrink-0 border-r border-gray-200 bg-white overflow-y-auto">
+            <div className="w-80 shrink-0 border-r border-edge bg-surface overflow-y-auto">
               {leftPanel}
             </div>
-            <div className="flex-1 bg-white overflow-y-auto">
+            <div className="flex-1 bg-surface overflow-y-auto">
               {centerPanel}
             </div>
-            <div className="w-72 shrink-0 border-l border-gray-200 bg-amber-50 overflow-y-auto">
+            <div className="w-72 shrink-0 border-l border-edge bg-canvas overflow-y-auto">
               {rightPanel}
             </div>
           </div>
@@ -67,7 +67,7 @@ export function AppShell({ leftPanel, centerPanel, rightPanel }: Props) {
             <div
               role="tablist"
               aria-label="Arbeitsbereiche"
-              className="flex shrink-0 border-b border-gray-200 bg-white"
+              className="flex shrink-0 border-b border-edge bg-surface"
             >
               {TABS.map((tab, idx) => (
                 <button
@@ -83,7 +83,7 @@ export function AppShell({ leftPanel, centerPanel, rightPanel }: Props) {
                     'flex-1 py-2.5 text-xs font-medium transition-colors border-b-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-inset',
                     activeTab === tab.id
                       ? 'border-brand text-brand'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300',
+                      : 'border-transparent text-ink-secondary hover:text-ink hover:border-edge',
                   ].join(' ')}
                 >
                   {tab.label}
@@ -91,29 +91,14 @@ export function AppShell({ leftPanel, centerPanel, rightPanel }: Props) {
               ))}
             </div>
 
-            <div className="flex-1 overflow-y-auto">
-              <div
-                role="tabpanel"
-                id="panel-anforderung"
-                aria-labelledby="tab-anforderung"
-                hidden={activeTab !== 'anforderung'}
-              >
+            <div className="flex-1 overflow-y-auto bg-surface">
+              <div role="tabpanel" id="panel-anforderung" aria-labelledby="tab-anforderung" hidden={activeTab !== 'anforderung'}>
                 {leftPanel}
               </div>
-              <div
-                role="tabpanel"
-                id="panel-story"
-                aria-labelledby="tab-story"
-                hidden={activeTab !== 'story'}
-              >
+              <div role="tabpanel" id="panel-story" aria-labelledby="tab-story" hidden={activeTab !== 'story'}>
                 {centerPanel}
               </div>
-              <div
-                role="tabpanel"
-                id="panel-refinement"
-                aria-labelledby="tab-refinement"
-                hidden={activeTab !== 'refinement'}
-              >
+              <div role="tabpanel" id="panel-refinement" aria-labelledby="tab-refinement" hidden={activeTab !== 'refinement'}>
                 {rightPanel}
               </div>
             </div>

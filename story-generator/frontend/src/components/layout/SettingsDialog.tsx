@@ -70,15 +70,15 @@ export function SettingsDialog({ open, onClose }: Props) {
       ref={dialogRef}
       onClick={handleBackdropClick}
       aria-labelledby="settings-dialog-title"
-      className="m-auto rounded-xl shadow-xl border border-gray-200 p-0 w-full max-w-sm backdrop:bg-gray-900/50"
+      className="m-auto rounded-xl shadow-xl border border-edge bg-surface p-0 w-full max-w-sm backdrop:bg-ink/40"
     >
       <div className="p-5">
-        <h2 id="settings-dialog-title" className="text-base font-semibold text-gray-900 mb-4">
+        <h2 id="settings-dialog-title" className="font-serif text-base font-semibold text-ink mb-4">
           API-Key ändern
         </h2>
 
         <div>
-          <label htmlFor="settings-apikey" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="settings-apikey" className="block text-sm font-medium text-ink mb-1">
             Anthropic API-Key
           </label>
           <div className="relative">
@@ -90,7 +90,7 @@ export function SettingsDialog({ open, onClose }: Props) {
               onChange={(e) => setValue(e.target.value)}
               placeholder="sk-ant-…"
               autoComplete="off"
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent"
+              className="w-full border border-edge rounded-lg px-3 py-2 pr-10 text-sm text-ink bg-surface placeholder:text-ink-tertiary focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent"
               onKeyDown={(e) => e.key === 'Enter' && handleSave()}
             />
             {/*
@@ -102,12 +102,12 @@ export function SettingsDialog({ open, onClose }: Props) {
               type="button"
               onClick={() => setShowKey((v) => !v)}
               aria-label={showKey ? 'API-Key verbergen' : 'API-Key anzeigen'}
-              className="absolute right-1 top-1/2 -translate-y-1/2 min-h-[44px] min-w-[44px] flex items-center justify-center text-gray-400 hover:text-gray-600 rounded focus:outline-none focus:ring-2 focus:ring-brand"
+              className="absolute right-1 top-1/2 -translate-y-1/2 min-h-[44px] min-w-[44px] flex items-center justify-center text-ink-tertiary hover:text-ink-secondary rounded focus:outline-none focus:ring-2 focus:ring-brand"
             >
               {showKey ? <EyeOffIcon /> : <EyeIcon />}
             </button>
           </div>
-          <p className="mt-1.5 text-xs text-gray-500">
+          <p className="mt-1.5 text-xs text-ink-tertiary">
             Deinen API-Key findest du unter{' '}
             <a
               href="https://console.anthropic.com"
@@ -125,7 +125,7 @@ export function SettingsDialog({ open, onClose }: Props) {
           <button
             type="button"
             onClick={onClose}
-            className="flex-1 border border-gray-300 text-gray-700 font-medium py-2 rounded-lg text-sm hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-2"
+            className="flex-1 border border-edge text-ink-secondary font-medium py-2 rounded-lg text-sm hover:bg-edge-2 transition-colors focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-2"
           >
             Abbrechen
           </button>

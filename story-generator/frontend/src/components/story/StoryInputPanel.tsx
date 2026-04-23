@@ -40,12 +40,11 @@ export function StoryInputPanel({ activeStory, onGeneratingChange }: Props) {
   };
 
   return (
-    <div className="p-4 flex flex-col gap-4 min-h-full">
+    <div className="p-5 flex flex-col gap-6 min-h-full">
       <section aria-labelledby="anforderung-heading">
-        {/* text-gray-600 on white #fff ≈ 7.56:1 (WCAG AA ✓, vorher text-gray-400 ≈ 2.35:1 ✗) */}
         <h2
           id="anforderung-heading"
-          className="text-xs font-semibold text-gray-600 uppercase tracking-wider mb-3"
+          className="text-xs font-semibold text-ink-secondary uppercase tracking-widest mb-4"
         >
           Anforderung
         </h2>
@@ -62,31 +61,29 @@ export function StoryInputPanel({ activeStory, onGeneratingChange }: Props) {
               placeholder="Anforderung eingeben…"
               rows={8}
               aria-describedby="anforderung-hint"
-              /* placeholder:text-gray-500 = #6b7280 on white #fff ≈ 4.83:1 (WCAG AA ✓) */
-              className="w-full resize-none border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-800 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent"
+              className="w-full resize-none border border-edge rounded-lg px-3.5 py-3 text-sm text-ink bg-surface placeholder:text-ink-tertiary focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent leading-relaxed"
             />
-            <p id="anforderung-hint" className="mt-1 text-xs text-gray-500">
+            <p id="anforderung-hint" className="mt-1.5 text-xs text-ink-tertiary leading-relaxed">
               Slack-Nachricht, Sticky Note oder spontane Idee — einfach in eigenen Worten beschreiben.
             </p>
           </div>
+
           {generateError && (
-            <p role="alert" className="text-xs text-red-600 bg-red-50 border border-red-200 rounded px-3 py-2">
+            <p role="alert" className="text-xs text-red-700 bg-red-50 border border-red-200 rounded px-3 py-2">
               {generateError instanceof Error ? generateError.message : 'Fehler beim Generieren.'}
             </p>
           )}
+
           {/* WCAG 2.4.7 – Focus Visible: expliziter Fokus-Ring für Submit-Button */}
           <button
             type="submit"
             disabled={isGenerating || !rawInput.trim()}
             aria-busy={isGenerating}
-            className="w-full bg-brand hover:bg-brand-dark text-white font-medium py-2.5 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-2"
+            className="w-full bg-brand hover:bg-brand-dark text-white font-medium py-2.5 rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2 focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-2 focus:ring-offset-surface"
           >
             {isGenerating ? (
               <>
-                <span
-                  className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"
-                  aria-hidden="true"
-                />
+                <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" aria-hidden="true" />
                 Wird generiert…
               </>
             ) : (
@@ -97,11 +94,10 @@ export function StoryInputPanel({ activeStory, onGeneratingChange }: Props) {
       </section>
 
       {activeStory && (
-        <section aria-labelledby="refinement-heading" className="border-t border-gray-100 pt-4">
-          {/* text-gray-600 on white #fff ≈ 7.56:1 (WCAG AA ✓) */}
+        <section aria-labelledby="refinement-heading" className="border-t border-edge pt-5">
           <h2
             id="refinement-heading"
-            className="text-xs font-semibold text-gray-600 uppercase tracking-wider mb-3"
+            className="text-xs font-semibold text-ink-secondary uppercase tracking-widest mb-4"
           >
             Refinement-Anweisung
           </h2>
@@ -117,30 +113,29 @@ export function StoryInputPanel({ activeStory, onGeneratingChange }: Props) {
                 placeholder="Anweisung eingeben…"
                 rows={4}
                 aria-describedby="refinement-hint"
-                className="w-full resize-none border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-800 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent"
+                className="w-full resize-none border border-edge rounded-lg px-3.5 py-3 text-sm text-ink bg-surface placeholder:text-ink-tertiary focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent leading-relaxed"
               />
-              <p id="refinement-hint" className="mt-1 text-xs text-gray-500">
+              <p id="refinement-hint" className="mt-1.5 text-xs text-ink-tertiary">
                 z.&thinsp;B. «Mach AK-2 spezifischer» oder «Berücksichtige den Offline-Fall»
               </p>
             </div>
+
             {refineError && (
-              <p role="alert" className="text-xs text-red-600 bg-red-50 border border-red-200 rounded px-3 py-2">
+              <p role="alert" className="text-xs text-red-700 bg-red-50 border border-red-200 rounded px-3 py-2">
                 {refineError instanceof Error ? refineError.message : 'Fehler beim Verfeinern.'}
               </p>
             )}
+
             {/* WCAG 2.4.7 – Focus Visible: expliziter Fokus-Ring */}
             <button
               type="submit"
               disabled={isRefining || !refinementInstruction.trim()}
               aria-busy={isRefining}
-              className="w-full bg-white border border-brand text-brand hover:bg-brand-light font-medium py-2.5 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-2"
+              className="w-full bg-surface border border-brand text-brand hover:bg-brand-light font-medium py-2.5 rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2 focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-2 focus:ring-offset-surface"
             >
               {isRefining ? (
                 <>
-                  <span
-                    className="w-4 h-4 border-2 border-brand border-t-transparent rounded-full animate-spin"
-                    aria-hidden="true"
-                  />
+                  <span className="w-4 h-4 border-2 border-brand border-t-transparent rounded-full animate-spin" aria-hidden="true" />
                   Story wird verfeinert…
                 </>
               ) : (

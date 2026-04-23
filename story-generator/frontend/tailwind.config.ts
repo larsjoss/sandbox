@@ -6,10 +6,25 @@ export default {
     extend: {
       colors: {
         brand: {
-          DEFAULT: '#6366f1',
-          dark: '#4f46e5',
-          light: '#e0e7ff',
+          DEFAULT: '#1C2B1E',
+          dark: '#131e15',
+          light: '#E8EFE9',
         },
+        canvas: '#F5F0E8',
+        surface: '#FAFAF8',
+        ink: {
+          DEFAULT: '#1C2420',
+          secondary: '#5C5852',
+          tertiary: '#6B6860',
+        },
+        edge: {
+          DEFAULT: '#DDD8CF',
+          2: '#EBE6DA',
+        },
+      },
+      fontFamily: {
+        serif: ['Playfair Display', 'Georgia', 'serif'],
+        sans: ['Inter', 'system-ui', 'sans-serif'],
       },
     },
   },

@@ -8,14 +8,15 @@ export function AuthPage() {
   if (user) return <Navigate to="/" replace />;
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-canvas flex items-center justify-center p-6">
       <main className="w-full max-w-sm" aria-label="Anmeldung">
-        <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold text-gray-900">Story Generator</h1>
-          <p className="text-sm text-gray-500 mt-1">Anforderungen in Stories verwandeln</p>
+        <div className="text-center mb-10">
+          <h1 className="font-serif text-3xl font-semibold text-ink">Story Generator</h1>
+          <p className="text-sm text-ink-secondary mt-2">Anforderungen in Stories verwandeln</p>
         </div>
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-5">Anmelden</h2>
+
+        <div className="bg-surface rounded-xl shadow-sm border border-edge p-8">
+          <h2 className="font-serif text-xl font-semibold text-ink mb-6">Anmelden</h2>
           <LoginForm />
         </div>
       </main>
