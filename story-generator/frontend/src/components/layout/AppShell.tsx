@@ -57,7 +57,7 @@ export function AppShell({ leftPanel, centerPanel, rightPanel }: Props) {
             <div className="flex-1 bg-canvas overflow-hidden flex flex-col">
               {centerPanel}
             </div>
-            <div className="w-60 shrink-0 border-l border-edge bg-canvas overflow-hidden flex flex-col">
+            <div className="w-80 shrink-0 border-l border-edge bg-canvas overflow-hidden flex flex-col">
               {rightPanel}
             </div>
           </div>
