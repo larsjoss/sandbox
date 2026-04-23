@@ -32,6 +32,11 @@ export interface ConversationMessage {
   content: string;
 }
 
+export interface HintAnswer {
+  hint: string;
+  answer: string;
+}
+
 function getClient(): Anthropic {
   const apiKey = sessionStorage.getItem(API_KEY_SESSION_KEY);
   if (!apiKey) throw new Error('Kein API-Key konfiguriert. Bitte einloggen und API-Key eingeben.');
@@ -63,6 +68,31 @@ export async function generateStory(
     max_tokens: 2048,
     system: SYSTEM_PROMPT,
     messages: [{ role: 'user', content: rawInput }],
+  });
+  const text = response.content
+    .filter((b): b is TextBlock => b.type === 'text')
+    .map((b) => b.text)
+    .join('');
+  return parseOutput(text);
+}
+
+export async function refineStoryWithHints(
+  currentStory: string,
+  hintAnswers: HintAnswer[],
+): Promise<{ generatedStory: string; refinementHints: string }> {
+  const anthropic = getClient();
+  const pairs = hintAnswers
+    .map(({ hint, answer }) => `[Hinweis]: ${hint}\n[Antwort]: ${answer}`)
+    .join('\n\n');
+  const userMessage =
+    `Hier ist die aktuelle Story:\n\n${currentStory}\n\n` +
+    `Bitte überarbeite die Story auf Basis der folgenden beantworteten Refinement-Hinweise. ` +
+    `Behalte das bestehende Output-Template exakt bei.\n\nBeantwortete Hinweise:\n${pairs}`;
+  const response = await anthropic.messages.create({
+    model: 'claude-sonnet-4-5',
+    max_tokens: 2048,
+    system: SYSTEM_PROMPT,
+    messages: [{ role: 'user', content: userMessage }],
   });
   const text = response.content
     .filter((b): b is TextBlock => b.type === 'text')

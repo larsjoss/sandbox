@@ -29,6 +29,33 @@ export function useGenerateStory() {
   });
 }
 
+export function useRefineStoryWithHints(id: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (params: {
+      currentStory: string;
+      hintAnswers: claude.HintAnswer[];
+      currentTitle: string;
+    }) => {
+      const { generatedStory, refinementHints } = await claude.refineStoryWithHints(
+        params.currentStory,
+        params.hintAnswers,
+      );
+      const title = claude.extractTitle(generatedStory, params.currentTitle);
+      return storage.updateStory(id, generatedStory, refinementHints, title);
+    },
+    onSuccess: (story) => {
+      queryClient.setQueryData(['story', id], (old: StoryDetailResponse | undefined) => {
+        if (!old) return old;
+        return { ...old, story };
+      });
+      queryClient.invalidateQueries({ queryKey: ['stories'] });
+      queryClient.invalidateQueries({ queryKey: ['story', id] });
+    },
+  });
+}
+
 export function useRefineStory(id: string) {
   const queryClient = useQueryClient();
 

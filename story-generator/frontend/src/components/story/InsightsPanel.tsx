@@ -1,16 +1,21 @@
+import { useEffect, useRef, useState } from 'react';
 import type { Story } from '../../types';
+import { useRefineStoryWithHints } from '../../hooks/useStory';
+import type { HintAnswer } from '../../services/claude';
 
 interface Props {
   story?: Story;
   isLoading?: boolean;
+  onRefiningChange?: (refining: boolean) => void;
 }
 
-// Priority order and visual config for each category
+// ─── Category config ──────────────────────────────────────────────────────────
+
 const CATEGORY_CONFIG: Record<string, { label: string; dot: string; text: string }> = {
-  KRITISCH:    { label: 'Kritisch',   dot: 'bg-red-500',         text: 'text-red-700'       },
-  WICHTIG:     { label: 'Wichtig',    dot: 'bg-amber-500',       text: 'text-amber-700'     },
-  EMPFEHLUNG:  { label: 'Empfehlung', dot: 'bg-brand/60',        text: 'text-ink-secondary' },
-  HINWEIS:     { label: 'Hinweis',    dot: 'bg-ink-tertiary/50', text: 'text-ink-secondary' },
+  KRITISCH:   { label: 'Kritisch',   dot: 'bg-red-500',         text: 'text-red-700'       },
+  WICHTIG:    { label: 'Wichtig',    dot: 'bg-amber-500',       text: 'text-amber-700'     },
+  EMPFEHLUNG: { label: 'Empfehlung', dot: 'bg-brand/60',        text: 'text-ink-secondary' },
+  HINWEIS:    { label: 'Hinweis',    dot: 'bg-ink-tertiary/50', text: 'text-ink-secondary' },
 };
 const CATEGORY_ORDER = ['KRITISCH', 'WICHTIG', 'EMPFEHLUNG', 'HINWEIS'] as const;
 
@@ -21,15 +26,8 @@ interface Category {
 
 function parseHints(raw: string): Category[] {
   const categoryMap = new Map<string, string[]>();
-
   for (const line of raw.split('\n')) {
-    // Strip markdown bold markers and leading list symbols, then try to match a category label
-    const cleaned = line
-      .trim()
-      .replace(/\*+/g, '')   // remove ** bold markers
-      .replace(/^[-•]\s*/, '') // remove leading dash / bullet
-      .trim();
-
+    const cleaned = line.trim().replace(/\*+/g, '').replace(/^[-•]\s*/, '').trim();
     const match = cleaned.match(/^(KRITISCH|WICHTIG|EMPFEHLUNG|HINWEIS):\s*(.+)/i);
     if (match) {
       const cat = match[1].toUpperCase();
@@ -38,27 +36,159 @@ function parseHints(raw: string): Category[] {
       categoryMap.get(cat)!.push(text);
     }
   }
-
   return CATEGORY_ORDER
     .filter((c) => categoryMap.has(c))
     .map((name) => ({ name, items: categoryMap.get(name)! }));
 }
 
-function CategorySection({ name, items, defaultOpen }: { name: string; items: string[]; defaultOpen: boolean }) {
-  const cfg = CATEGORY_CONFIG[name] ?? { label: name, dot: 'bg-edge', text: 'text-ink-secondary' };
+// ─── Auto-growing textarea ────────────────────────────────────────────────────
+
+interface AutoTextareaProps {
+  value: string;
+  onChange: (v: string) => void;
+  disabled: boolean;
+  placeholder: string;
+  id: string;
+}
+
+function AutoTextarea({ value, onChange, disabled, placeholder, id }: AutoTextareaProps) {
+  const ref = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    if (!ref.current) return;
+    ref.current.style.height = 'auto';
+    ref.current.style.height = `${ref.current.scrollHeight}px`;
+  }, [value]);
+
+  return (
+    <textarea
+      ref={ref}
+      id={id}
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      disabled={disabled}
+      placeholder={placeholder}
+      rows={2}
+      className="w-full resize-none overflow-hidden border border-edge rounded-lg px-3 py-2.5 text-xs text-ink bg-surface placeholder:text-ink-tertiary focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent leading-relaxed disabled:opacity-50 disabled:cursor-not-allowed transition-opacity"
+      style={{ minHeight: '56px' }}
+    />
+  );
+}
+
+// ─── Single hint card ─────────────────────────────────────────────────────────
+
+interface HintCardProps {
+  hint: string;
+  answer: string;
+  isOpen: boolean;
+  disabled: boolean;
+  onToggle: () => void;
+  onAnswerChange: (value: string) => void;
+  cardId: string;
+}
+
+function HintCard({ hint, answer, isOpen, disabled, onToggle, onAnswerChange, cardId }: HintCardProps) {
+  const isAnswered = answer.trim().length > 0;
+  const inputId = `hint-answer-${cardId}`;
 
   return (
     /*
-     * <details>/<summary> is the semantic HTML pattern for disclosure/accordion.
-     * group-open:rotate-180 rotates the chevron via Tailwind's group-open variant.
-     * WCAG 4.1.2 – natively exposes expanded/collapsed state to assistive technology.
+     * Answered cards get a green-tinted left border accent (ANF-02).
+     * WCAG 4.1.2 – aria-expanded on the toggle button.
      */
-    <details open={defaultOpen} className="group border border-edge rounded-xl overflow-hidden">
+    <div className={`rounded-lg border overflow-hidden transition-colors ${
+      isAnswered ? 'border-brand/40 bg-brand-light/20' : 'border-edge bg-surface'
+    }`}>
+      {/* Toggle row */}
+      <button
+        onClick={onToggle}
+        disabled={disabled}
+        aria-expanded={isOpen}
+        aria-controls={isOpen ? inputId : undefined}
+        className="w-full flex items-start gap-2.5 px-3 py-2.5 text-left group focus:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-inset disabled:cursor-not-allowed"
+      >
+        {/* Answered / reply indicator */}
+        <span
+          className={`mt-0.5 shrink-0 transition-colors ${
+            isAnswered ? 'text-brand' : 'text-ink-tertiary/40 group-hover:text-ink-tertiary'
+          }`}
+          aria-hidden="true"
+        >
+          {isAnswered ? (
+            // Checkmark
+            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+            </svg>
+          ) : (
+            // Reply arrow
+            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
+            </svg>
+          )}
+        </span>
+
+        <p className="text-xs text-ink leading-relaxed flex-1">{hint}</p>
+
+        {/* Chevron */}
+        <svg
+          className={`w-3 h-3 text-ink-tertiary shrink-0 mt-1 transition-transform duration-150 ${isOpen ? 'rotate-180' : ''}`}
+          fill="none" stroke="currentColor" viewBox="0 0 24 24"
+          aria-hidden="true"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+
+      {/* Collapsible answer area (ANF-01) */}
+      {isOpen && (
+        <div className="px-3 pb-3">
+          <label htmlFor={inputId} className="sr-only">
+            Antwort auf: {hint}
+          </label>
+          <AutoTextarea
+            id={inputId}
+            value={answer}
+            onChange={onAnswerChange}
+            disabled={disabled}
+            placeholder="Antwort eingeben…"
+          />
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── Category accordion section ───────────────────────────────────────────────
+
+interface CategorySectionProps {
+  name: string;
+  items: string[];
+  answers: Record<string, string>;
+  openAnswers: Set<string>;
+  disabled: boolean;
+  onToggleAnswer: (hint: string) => void;
+  onAnswerChange: (hint: string, value: string) => void;
+}
+
+function CategorySection({
+  name, items, answers, openAnswers, disabled, onToggleAnswer, onAnswerChange,
+}: CategorySectionProps) {
+  const cfg = CATEGORY_CONFIG[name] ?? { label: name, dot: 'bg-edge', text: 'text-ink-secondary' };
+  const answeredCount = items.filter((h) => answers[h]?.trim()).length;
+
+  return (
+    /*
+     * <details>/<summary> — semantic disclosure pattern.
+     * group-open:rotate-180 rotates chevron via Tailwind's group-open variant.
+     */
+    <details open={name === 'KRITISCH'} className="group border border-edge rounded-xl overflow-hidden">
       <summary className="flex items-center justify-between px-4 py-3 cursor-pointer select-none bg-surface hover:bg-edge-2 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-inset">
         <div className="flex items-center gap-2.5">
           <span className={`w-2 h-2 rounded-full shrink-0 ${cfg.dot}`} aria-hidden="true" />
           <span className={`text-xs font-semibold uppercase tracking-wider ${cfg.text}`}>{cfg.label}</span>
-          <span className="text-xs text-ink-tertiary tabular-nums">({items.length})</span>
+          <span className="text-xs text-ink-tertiary tabular-nums">
+            {answeredCount > 0 ? `${answeredCount}/${items.length}` : `(${items.length})`}
+          </span>
         </div>
         <svg
           className="w-3.5 h-3.5 text-ink-tertiary transition-transform duration-200 group-open:rotate-180"
@@ -69,30 +199,91 @@ function CategorySection({ name, items, defaultOpen }: { name: string; items: st
         </svg>
       </summary>
 
-      <div className="divide-y divide-edge border-t border-edge">
-        {items.map((item, i) => (
-          <div key={i} className="px-4 py-3 flex items-start gap-3">
-            <span className="mt-[7px] w-1 h-1 rounded-full bg-ink-tertiary/40 shrink-0" aria-hidden="true" />
-            <p className="text-xs text-ink leading-relaxed">{item}</p>
-          </div>
+      <div className="divide-y divide-edge border-t border-edge space-y-0 px-3 py-3 flex flex-col gap-1.5">
+        {items.map((hint, i) => (
+          <HintCard
+            key={hint}
+            cardId={`${name}-${i}`}
+            hint={hint}
+            answer={answers[hint] ?? ''}
+            isOpen={openAnswers.has(hint)}
+            disabled={disabled}
+            onToggle={() => onToggleAnswer(hint)}
+            onAnswerChange={(v) => onAnswerChange(hint, v)}
+          />
         ))}
       </div>
     </details>
   );
 }
 
-export function InsightsPanel({ story, isLoading }: Props) {
+// ─── Main panel ───────────────────────────────────────────────────────────────
+
+export function InsightsPanel({ story, isLoading, onRefiningChange }: Props) {
+  const [answers, setAnswers] = useState<Record<string, string>>({});
+  const [openAnswers, setOpenAnswers] = useState<Set<string>>(new Set());
+  const refine = useRefineStoryWithHints(story?.id ?? '');
+
   const categories = story?.refinementHints ? parseHints(story.refinementHints) : [];
   const hasParsedCategories = categories.length > 0;
+  const hasAnswers = Object.values(answers).some((a) => a.trim().length > 0);
+
+  // Notify WorkspacePage so StoryOutputPanel can show the refinement banner (ANF-06)
+  const isPending = refine.isPending;
+  useEffect(() => {
+    onRefiningChange?.(isPending);
+  }, [isPending, onRefiningChange]);
+
+  // Reset answers when the story changes (new generation)
+  const storyId = story?.id;
+  useEffect(() => {
+    setAnswers({});
+    setOpenAnswers(new Set());
+  }, [storyId]);
+
+  const handleToggleAnswer = (hint: string) => {
+    setOpenAnswers((prev) => {
+      const next = new Set(prev);
+      if (next.has(hint)) next.delete(hint);
+      else next.add(hint);
+      return next;
+    });
+  };
+
+  const handleAnswerChange = (hint: string, value: string) => {
+    setAnswers((prev) => ({ ...prev, [hint]: value }));
+  };
+
+  const handleRefine = () => {
+    if (!story || !hasAnswers || refine.isPending) return;
+
+    // ANF-04: only answered pairs, no empty entries
+    const hintAnswers: HintAnswer[] = Object.entries(answers)
+      .filter(([, answer]) => answer.trim())
+      .map(([hint, answer]) => ({ hint, answer: answer.trim() }));
+
+    refine.mutate(
+      { currentStory: story.generatedStory, hintAnswers, currentTitle: story.title },
+      {
+        // ANF-05: clear answers on success
+        onSuccess: () => {
+          setAnswers({});
+          setOpenAnswers(new Set());
+        },
+      },
+    );
+  };
 
   return (
     <div className="flex flex-col h-full">
+      {/* Header */}
       <div className="px-5 py-3.5 border-b border-edge shrink-0">
         <h2 className="text-xs font-semibold text-ink-secondary uppercase tracking-widest">
           Hinweise
         </h2>
       </div>
 
+      {/* Scrollable hint content */}
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-2">
         {/* Loading skeleton */}
         {isLoading && (
@@ -117,26 +308,66 @@ export function InsightsPanel({ story, isLoading }: Props) {
           </div>
         )}
 
-        {/* No hints identified */}
+        {/* No hints returned */}
         {!isLoading && story && !story.refinementHints && (
           <p className="text-xs text-ink-tertiary leading-relaxed px-1">Keine offenen Punkte identifiziert.</p>
         )}
 
-        {/* Accordion: parsed categories */}
+        {/* Accordion with hint cards */}
         {!isLoading && hasParsedCategories && categories.map((cat) => (
           <CategorySection
             key={cat.name}
             name={cat.name}
             items={cat.items}
-            defaultOpen={cat.name === 'KRITISCH'}
+            answers={answers}
+            openAnswers={openAnswers}
+            disabled={refine.isPending}
+            onToggleAnswer={handleToggleAnswer}
+            onAnswerChange={handleAnswerChange}
           />
         ))}
 
-        {/* Fallback: raw text if categories couldn't be parsed */}
+        {/* Fallback: raw text if parser found no categories */}
         {!isLoading && story?.refinementHints && !hasParsedCategories && (
-          <p className="text-xs text-ink leading-relaxed whitespace-pre-wrap">{story.refinementHints}</p>
+          <p className="text-xs text-ink leading-relaxed whitespace-pre-wrap px-1">
+            {story.refinementHints}
+          </p>
         )}
       </div>
+
+      {/* Footer: "Story verfeinern" button (ANF-03) */}
+      {story && (
+        <div className="px-4 py-3.5 border-t border-edge shrink-0 space-y-2">
+          {/* Inline error (ANF-07) */}
+          {refine.error && (
+            <p role="alert" className="text-xs text-red-700 bg-red-50 border border-red-200 rounded-lg px-3 py-2 leading-relaxed">
+              {refine.error instanceof Error ? refine.error.message : 'Fehler beim Verfeinern. Bitte erneut versuchen.'}
+            </p>
+          )}
+
+          {/*
+           * ANF-03 – active only when ≥1 answer is filled.
+           * Tooltip via `title` attribute when inactive.
+           * WCAG 2.4.7 – Focus Visible: explicit focus ring.
+           */}
+          <button
+            onClick={handleRefine}
+            disabled={!hasAnswers || refine.isPending}
+            aria-busy={refine.isPending}
+            title={!hasAnswers ? 'Beantworte mindestens einen Hinweis, um die Story zu verfeinern.' : undefined}
+            className="w-full bg-surface border border-brand text-brand hover:bg-brand-light font-medium py-2.5 rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2 focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-2 focus:ring-offset-canvas"
+          >
+            {refine.isPending ? (
+              <>
+                <span className="w-4 h-4 border-2 border-brand border-t-transparent rounded-full animate-spin" aria-hidden="true" />
+                Wird verfeinert…
+              </>
+            ) : (
+              'Story verfeinern'
+            )}
+          </button>
+        </div>
+      )}
     </div>
   );
 }
