@@ -22,3 +22,7 @@ body {
 /* Suppress browser-native password reveal/clear controls (Edge/IE) in favour of our custom toggle */
 input[type="password"]::-ms-reveal,
 input[type="password"]::-ms-clear { display: none; }
+
+/* Remove native disclosure triangle from <summary> — we render our own chevron */
+summary { list-style: none; }
+summary::-webkit-details-marker { display: none; }
