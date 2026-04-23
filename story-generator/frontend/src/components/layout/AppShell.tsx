@@ -51,13 +51,13 @@ export function AppShell({ leftPanel, centerPanel, rightPanel }: Props) {
         <main id="main-content" className="flex flex-col flex-1 overflow-hidden">
           {/* Desktop: drei Spalten */}
           <div className="hidden md:flex flex-1 overflow-hidden h-full">
-            <div className="w-80 shrink-0 border-r border-edge bg-surface overflow-y-auto">
+            <div className="w-72 shrink-0 border-r border-edge bg-canvas overflow-hidden flex flex-col">
               {leftPanel}
             </div>
-            <div className="flex-1 bg-surface overflow-y-auto">
+            <div className="flex-1 bg-canvas overflow-hidden flex flex-col">
               {centerPanel}
             </div>
-            <div className="w-72 shrink-0 border-l border-edge bg-canvas overflow-y-auto">
+            <div className="w-60 shrink-0 border-l border-edge bg-canvas overflow-hidden flex flex-col">
               {rightPanel}
             </div>
           </div>
@@ -91,7 +91,7 @@ export function AppShell({ leftPanel, centerPanel, rightPanel }: Props) {
               ))}
             </div>
 
-            <div className="flex-1 overflow-y-auto bg-surface">
+            <div className="flex-1 overflow-y-auto bg-canvas">
               <div role="tabpanel" id="panel-anforderung" aria-labelledby="tab-anforderung" hidden={activeTab !== 'anforderung'}>
                 {leftPanel}
               </div>
