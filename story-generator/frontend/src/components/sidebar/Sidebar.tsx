@@ -42,9 +42,8 @@ export function Sidebar() {
   return (
     <>
       <aside className="flex flex-col h-full">
-        {/* Header — same height as panel headers (py-3.5) so the border-b aligns */}
-        <div className="px-4 py-3.5 border-b border-edge flex items-center justify-between shrink-0">
-          <h1 className="font-serif text-base font-semibold text-ink">Story Generator</h1>
+        <div className="px-4 pt-5 pb-3 flex items-center justify-between shrink-0">
+          <h1 className="font-serif text-lg font-semibold text-ink">Story Generator</h1>
           {apiKey && (
             <span
               aria-label="Anthropic API-Key aktiv"

@@ -20,20 +20,6 @@ function formatStoryMarkdown(raw: string): string {
     .replace(/^([ \t]*[-*][ \t]+)(AK-\d+):/gm, '$1**$2:**');
 }
 
-function Skeleton() {
-  return (
-    <div className="animate-pulse space-y-3 p-6" aria-hidden="true">
-      <div className="h-4 bg-edge rounded w-2/3" />
-      <div className="h-3 bg-edge/60 rounded w-full" />
-      <div className="h-3 bg-edge/60 rounded w-5/6" />
-      <div className="h-3 bg-edge/60 rounded w-4/6" />
-      <div className="h-4 bg-edge rounded w-1/3 mt-5" />
-      <div className="h-3 bg-edge/60 rounded w-full" />
-      <div className="h-3 bg-edge/60 rounded w-full" />
-    </div>
-  );
-}
-
 export function StoryOutputPanel({ story, isLoading, isGenerating }: Props) {
   const outputRef = useRef<HTMLDivElement>(null);
   const wasGenerating = useRef(false);
@@ -57,33 +43,11 @@ export function StoryOutputPanel({ story, isLoading, isGenerating }: Props) {
     }
   };
 
-  if (isLoading) {
-    return (
-      <div role="status" aria-label="Story wird geladen">
-        <Skeleton />
-      </div>
-    );
-  }
-
   const busy = isGenerating ?? false;
-
-  if (!story && !busy) {
-    return (
-      <div className="flex flex-col items-center justify-center h-full min-h-64 text-center p-10">
-        <div className="w-11 h-11 bg-edge-2 rounded-xl flex items-center justify-center mb-4">
-          <svg className="w-5 h-5 text-ink-tertiary" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-          </svg>
-        </div>
-        <p className="text-sm text-ink-tertiary leading-relaxed">
-          Gib eine Anforderung ein und klicke auf „Story generieren".
-        </p>
-      </div>
-    );
-  }
 
   return (
     <div className="flex flex-col h-full">
+      {/* Header always visible so the border aligns with the other panels */}
       <div className="px-5 py-3.5 border-b border-edge shrink-0">
         <h2 className="text-xs font-semibold text-ink-secondary uppercase tracking-widest">Story</h2>
       </div>
@@ -99,10 +63,11 @@ export function StoryOutputPanel({ story, isLoading, isGenerating }: Props) {
         aria-busy={busy}
         aria-live="polite"
         aria-label="Generierte Story"
-        className="flex-1 overflow-y-auto px-6 py-5 outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-inset"
+        className="flex-1 overflow-y-auto outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-inset"
       >
-        {busy && !story && (
-          <div className="animate-pulse space-y-3" aria-hidden="true">
+        {/* Initial load skeleton */}
+        {isLoading && (
+          <div className="animate-pulse space-y-3 px-6 py-5" aria-hidden="true">
             <div className="h-4 bg-edge rounded w-2/3" />
             <div className="h-3 bg-edge/60 rounded w-full" />
             <div className="h-3 bg-edge/60 rounded w-5/6" />
@@ -112,46 +77,73 @@ export function StoryOutputPanel({ story, isLoading, isGenerating }: Props) {
             <div className="h-3 bg-edge/60 rounded w-full" />
           </div>
         )}
-        {story && (
-          <div className="prose prose-sm max-w-none prose-headings:font-semibold prose-strong:font-semibold prose-p:text-ink prose-li:text-ink prose-headings:text-ink prose-strong:text-ink leading-relaxed">
-            <ReactMarkdown rehypePlugins={[rehypeSanitize]}>
-              {formatStoryMarkdown(story.generatedStory)}
-            </ReactMarkdown>
+
+        {/* Empty state */}
+        {!isLoading && !story && !busy && (
+          <div className="flex flex-col items-center justify-center h-full min-h-64 text-center p-10">
+            <div className="w-11 h-11 bg-edge-2 rounded-xl flex items-center justify-center mb-4">
+              <svg className="w-5 h-5 text-ink-tertiary" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+            </div>
+            <p className="text-sm text-ink-tertiary leading-relaxed">
+              Gib eine Anforderung ein und klicke auf „Story generieren".
+            </p>
+          </div>
+        )}
+
+        {/* Generating skeleton */}
+        {!isLoading && busy && !story && (
+          <div className="animate-pulse space-y-3 px-6 py-5" aria-hidden="true">
+            <div className="h-4 bg-edge rounded w-2/3" />
+            <div className="h-3 bg-edge/60 rounded w-full" />
+            <div className="h-3 bg-edge/60 rounded w-5/6" />
+            <div className="h-3 bg-edge/60 rounded w-4/6" />
+            <div className="h-4 bg-edge rounded w-1/3 mt-5" />
+            <div className="h-3 bg-edge/60 rounded w-full" />
+            <div className="h-3 bg-edge/60 rounded w-full" />
+          </div>
+        )}
+
+        {/* Story content + copy button scrolling together */}
+        {!isLoading && story && (
+          <div className="px-6 py-5">
+            <div className="prose prose-sm max-w-none prose-headings:font-semibold prose-strong:font-semibold prose-p:text-ink prose-li:text-ink prose-headings:text-ink prose-strong:text-ink leading-relaxed">
+              <ReactMarkdown rehypePlugins={[rehypeSanitize]}>
+                {formatStoryMarkdown(story.generatedStory)}
+              </ReactMarkdown>
+            </div>
+
+            {/*
+             * Copy button scrolls with the story content.
+             * WCAG 4.1.2 – aria-label benennt die Aktion; aria-live="polite" meldet Zustandsänderung.
+             * WCAG 2.4.7 – Focus Visible: expliziter Fokus-Ring.
+             */}
+            <button
+              onClick={handleCopy}
+              aria-label={copied ? 'Story kopiert' : 'Story kopieren'}
+              aria-live="polite"
+              className="mt-6 w-full bg-brand hover:bg-brand-dark text-white font-medium py-2.5 rounded-lg transition-colors flex items-center justify-center gap-2 focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-2 focus:ring-offset-canvas"
+            >
+              {copied ? (
+                <>
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  Kopiert!
+                </>
+              ) : (
+                <>
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                  </svg>
+                  Kopieren
+                </>
+              )}
+            </button>
           </div>
         )}
       </div>
-
-      {/* Primary copy button — shown only when a story exists */}
-      {story && (
-        <div className="px-5 py-3.5 border-t border-edge shrink-0">
-          {/*
-           * WCAG 4.1.2 – aria-label benennt die Aktion; aria-live="polite" meldet Zustandsänderung.
-           * WCAG 2.4.7 – Focus Visible: expliziter Fokus-Ring.
-           */}
-          <button
-            onClick={handleCopy}
-            aria-label={copied ? 'Story kopiert' : 'Story kopieren'}
-            aria-live="polite"
-            className="w-full bg-brand hover:bg-brand-dark text-white font-medium py-2.5 rounded-lg transition-colors flex items-center justify-center gap-2 focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-2 focus:ring-offset-canvas"
-          >
-            {copied ? (
-              <>
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-                Kopiert!
-              </>
-            ) : (
-              <>
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                </svg>
-                Kopieren
-              </>
-            )}
-          </button>
-        </div>
-      )}
     </div>
   );
 }
