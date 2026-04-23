@@ -151,12 +151,6 @@ export function LoginForm({ onSwitch }: Props) {
         {loading ? 'Anmelden…' : 'Anmelden'}
       </button>
 
-      <p className="text-sm text-center text-gray-500">
-        Noch kein Account?{' '}
-        <button type="button" onClick={onSwitch} className="text-brand hover:underline font-medium">
-          Registrieren
-        </button>
-      </p>
     </form>
   );
 }

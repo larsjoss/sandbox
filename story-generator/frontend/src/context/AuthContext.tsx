@@ -1,8 +1,11 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
-import client from '../api/client';
+import React, { createContext, useContext, useState } from 'react';
 import type { User } from '../types';
 
 const API_KEY_SESSION_KEY = 'anthropic_api_key';
+const SESSION_USER_KEY = 'session_user';
+
+const ALLOWED_EMAIL = 'lars_joss@bluewin.ch';
+const ALLOWED_PASSWORD = 'Test1234';
 
 interface AuthContextType {
   user: User | null;
@@ -17,19 +20,18 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState<User | null>(() => {
+    try {
+      const stored = sessionStorage.getItem(SESSION_USER_KEY);
+      return stored ? (JSON.parse(stored) as User) : null;
+    } catch {
+      return null;
+    }
+  });
+
   const [apiKey, setApiKeyState] = useState<string | null>(
     () => sessionStorage.getItem(API_KEY_SESSION_KEY),
   );
-
-  useEffect(() => {
-    client
-      .get<{ user: User }>('/auth/me')
-      .then((res) => setUser(res.data.user))
-      .catch(() => setUser(null))
-      .finally(() => setLoading(false));
-  }, []);
 
   const setApiKey = (key: string) => {
     sessionStorage.setItem(API_KEY_SESSION_KEY, key);
@@ -37,27 +39,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const login = async (email: string, password: string, apiKeyParam?: string) => {
-    const res = await client.post<{ user: User }>('/auth/login', { email, password });
-    setUser(res.data.user);
-    if (apiKeyParam) {
-      setApiKey(apiKeyParam);
+    if (email !== ALLOWED_EMAIL || password !== ALLOWED_PASSWORD) {
+      throw new Error('Ungültige E-Mail-Adresse oder Passwort');
     }
+    const u: User = { id: '1', email };
+    sessionStorage.setItem(SESSION_USER_KEY, JSON.stringify(u));
+    setUser(u);
+    if (apiKeyParam) setApiKey(apiKeyParam);
   };
 
-  const register = async (email: string, password: string) => {
-    const res = await client.post<{ user: User }>('/auth/register', { email, password });
-    setUser(res.data.user);
+  const register = async (_email: string, _password: string): Promise<void> => {
+    throw new Error('Registrierung ist in dieser Version nicht verfügbar');
   };
 
   const logout = async () => {
-    await client.post('/auth/logout');
+    sessionStorage.removeItem(SESSION_USER_KEY);
     sessionStorage.removeItem(API_KEY_SESSION_KEY);
     setApiKeyState(null);
     setUser(null);
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, apiKey, setApiKey, login, register, logout }}>
+    <AuthContext.Provider value={{ user, loading: false, apiKey, setApiKey, login, register, logout }}>
       {children}
     </AuthContext.Provider>
   );
