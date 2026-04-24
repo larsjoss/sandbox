@@ -33,7 +33,7 @@ export function StoryListItem({ story }: Props) {
     if (confirm(`Story "${story.title}" wirklich löschen?`)) {
       deleteStory.mutate(story.id, {
         onSuccess: () => {
-          if (isActive) navigate('/');
+          if (isActive) navigate('/tools/story-generator');
         },
       });
     }
@@ -46,7 +46,7 @@ export function StoryListItem({ story }: Props) {
        * WCAG 4.1.2 – aria-label + aria-current für aktive Story.
        */}
       <button
-        onClick={() => navigate(`/stories/${story.id}`)}
+        onClick={() => navigate(`/tools/story-generator/${story.id}`)}
         aria-label={`Story öffnen: ${story.title}`}
         aria-current={isActive ? 'page' : undefined}
         className={`w-full text-left px-3 py-2.5 rounded-lg transition-colors pr-9 focus:outline-none focus:ring-2 focus:ring-brand focus:ring-inset ${
