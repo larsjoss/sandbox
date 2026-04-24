@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import type { Story } from '../../types';
 import { useRefineStoryWithHints } from '../../hooks/useStory';
 import type { HintAnswer } from '../../services/claude';
+import { Button, InlineError } from '../../shared/components';
 
 interface Props {
   story?: Story;
@@ -340,32 +341,29 @@ export function InsightsPanel({ story, isLoading, onRefiningChange }: Props) {
         <div className="px-4 py-3.5 border-t border-edge shrink-0 space-y-2">
           {/* Inline error (ANF-07) */}
           {refine.error && (
-            <p role="alert" className="text-xs text-red-700 bg-red-50 border border-red-200 rounded-lg px-3 py-2 leading-relaxed">
-              {refine.error instanceof Error ? refine.error.message : 'Fehler beim Verfeinern. Bitte erneut versuchen.'}
-            </p>
+            <InlineError
+              message={
+                refine.error instanceof Error
+                  ? refine.error.message
+                  : 'Fehler beim Verfeinern. Bitte erneut versuchen.'
+              }
+            />
           )}
 
           {/*
            * ANF-03 – active only when ≥1 answer is filled.
            * Tooltip via `title` attribute when inactive.
-           * WCAG 2.4.7 – Focus Visible: explicit focus ring.
            */}
-          <button
+          <Button
+            variant="outline"
             onClick={handleRefine}
-            disabled={!hasAnswers || refine.isPending}
-            aria-busy={refine.isPending}
+            disabled={!hasAnswers}
+            loading={refine.isPending}
             title={!hasAnswers ? 'Beantworte mindestens einen Hinweis, um die Story zu verfeinern.' : undefined}
-            className="w-full bg-surface border border-brand text-brand hover:bg-brand-light font-medium py-2.5 rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2 focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-2 focus:ring-offset-canvas"
+            className="w-full"
           >
-            {refine.isPending ? (
-              <>
-                <span className="w-4 h-4 border-2 border-brand border-t-transparent rounded-full animate-spin" aria-hidden="true" />
-                Wird verfeinert…
-              </>
-            ) : (
-              'Story verfeinern'
-            )}
-          </button>
+            {refine.isPending ? 'Wird verfeinert…' : 'Story verfeinern'}
+          </Button>
         </div>
       )}
     </div>

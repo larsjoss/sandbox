@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import rehypeSanitize from 'rehype-sanitize';
 import type { Story } from '../../types';
+import { LoadingSkeleton, Button } from '../../shared/components';
 
 interface Props {
   story?: Story;
@@ -48,12 +49,11 @@ export function StoryOutputPanel({ story, isLoading, isGenerating, isRefining }:
 
   return (
     <div className="flex flex-col h-full">
-      {/* Header always visible so the border aligns with the other panels */}
       <div className="px-5 py-3.5 border-b border-edge shrink-0">
         <h2 className="text-xs font-semibold text-ink-secondary uppercase tracking-widest">Story</h2>
       </div>
 
-      {/* Non-blocking refinement banner — keeps story text visible (ANF-06) */}
+      {/* Non-blocking refinement banner (ANF-06) */}
       {isRefining && (
         <div className="shrink-0 px-5 py-2 bg-brand-light border-b border-brand/20 flex items-center gap-2" role="status" aria-live="polite">
           <span className="w-3.5 h-3.5 border-2 border-brand border-t-transparent rounded-full animate-spin shrink-0" aria-hidden="true" />
@@ -63,7 +63,6 @@ export function StoryOutputPanel({ story, isLoading, isGenerating, isRefining }:
 
       {/*
        * WCAG 2.4.7 – tabIndex={-1}: nur programmatisch fokussierbar.
-       * focus-visible:ring zeigt Ring wenn Browser :focus-visible auslöst.
        * WCAG 1.3.1 – aria-label benennt den Bereich für Screenreader.
        */}
       <div
@@ -76,14 +75,8 @@ export function StoryOutputPanel({ story, isLoading, isGenerating, isRefining }:
       >
         {/* Initial load skeleton */}
         {isLoading && (
-          <div className="animate-pulse space-y-3 px-6 py-5" aria-hidden="true">
-            <div className="h-4 bg-edge rounded w-2/3" />
-            <div className="h-3 bg-edge/60 rounded w-full" />
-            <div className="h-3 bg-edge/60 rounded w-5/6" />
-            <div className="h-3 bg-edge/60 rounded w-4/6" />
-            <div className="h-4 bg-edge rounded w-1/3 mt-5" />
-            <div className="h-3 bg-edge/60 rounded w-full" />
-            <div className="h-3 bg-edge/60 rounded w-full" />
+          <div className="px-6 py-5">
+            <LoadingSkeleton lines={7} />
           </div>
         )}
 
@@ -103,14 +96,8 @@ export function StoryOutputPanel({ story, isLoading, isGenerating, isRefining }:
 
         {/* Generating skeleton */}
         {!isLoading && busy && !story && (
-          <div className="animate-pulse space-y-3 px-6 py-5" aria-hidden="true">
-            <div className="h-4 bg-edge rounded w-2/3" />
-            <div className="h-3 bg-edge/60 rounded w-full" />
-            <div className="h-3 bg-edge/60 rounded w-5/6" />
-            <div className="h-3 bg-edge/60 rounded w-4/6" />
-            <div className="h-4 bg-edge rounded w-1/3 mt-5" />
-            <div className="h-3 bg-edge/60 rounded w-full" />
-            <div className="h-3 bg-edge/60 rounded w-full" />
+          <div className="px-6 py-5">
+            <LoadingSkeleton lines={7} />
           </div>
         )}
 
@@ -124,15 +111,14 @@ export function StoryOutputPanel({ story, isLoading, isGenerating, isRefining }:
             </div>
 
             {/*
-             * Copy button scrolls with the story content.
-             * WCAG 4.1.2 – aria-label benennt die Aktion; aria-live="polite" meldet Zustandsänderung.
-             * WCAG 2.4.7 – Focus Visible: expliziter Fokus-Ring.
+             * WCAG 4.1.2 – aria-label benennt die Aktion; aria-live="polite".
+             * Full-width am Ende des Inhalts: bewusste UX (erst lesen, dann kopieren).
              */}
-            <button
+            <Button
               onClick={handleCopy}
+              variant="primary"
               aria-label={copied ? 'Story kopiert' : 'Story kopieren'}
-              aria-live="polite"
-              className="mt-6 w-full bg-brand hover:bg-brand-dark text-white font-medium py-2.5 rounded-lg transition-colors flex items-center justify-center gap-2 focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-2 focus:ring-offset-canvas"
+              className="mt-6 w-full"
             >
               {copied ? (
                 <>
@@ -149,7 +135,7 @@ export function StoryOutputPanel({ story, isLoading, isGenerating, isRefining }:
                   Kopieren
                 </>
               )}
-            </button>
+            </Button>
           </div>
         )}
       </div>
