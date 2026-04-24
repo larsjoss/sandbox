@@ -29,40 +29,43 @@ export function ToolSelectionPage() {
   const navigate = useNavigate();
 
   return (
-    <div className="flex-1 overflow-auto bg-canvas flex items-start justify-center pt-16 px-6 pb-12">
+    /*
+     * WCAG 2.4.1 – Bypass Blocks: id="main-content" als Ziel des Skip-Links aus App.tsx.
+     * WCAG 1.3.6 – Identify Purpose: <main> als Hauptinhalt-Landmark.
+     */
+    <main
+      id="main-content"
+      className="flex-1 overflow-auto bg-canvas flex items-start justify-center pt-16 px-6 pb-12"
+    >
       <div className="w-full max-w-2xl">
         <div className="text-center mb-10">
           <h1 className="font-serif text-3xl font-semibold text-ink mb-3">Welches Tool brauchst du?</h1>
           <p className="text-sm text-ink-secondary">Wähle ein Tool, um loszulegen.</p>
         </div>
 
-        <div
-          role="list"
-          className="grid grid-cols-1 sm:grid-cols-2 gap-4"
-          aria-label="Verfügbare Tools"
-        >
+        <ul className="grid grid-cols-1 sm:grid-cols-2 gap-4 list-none p-0" aria-label="Verfügbare Tools">
           {TOOLS.map((tool) => (
-            <div key={tool.path} role="listitem">
+            <li key={tool.path}>
               <button
                 onClick={() => navigate(tool.path)}
-                className="w-full text-left bg-surface border border-edge rounded-xl p-6 hover:border-brand hover:shadow-sm transition-all group focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-2"
+                className="w-full text-left bg-surface border border-edge rounded-xl p-6 hover:border-brand hover:shadow-sm transition-all group focus:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2"
               >
-                <div className="text-brand group-hover:scale-105 transition-transform mb-4 w-fit">
+                <div className="text-brand group-hover:scale-105 transition-transform mb-4 w-fit" aria-hidden="true">
                   {tool.icon}
                 </div>
                 <h2 className="font-serif text-lg font-semibold text-ink mb-1.5">{tool.title}</h2>
                 <p className="text-sm text-ink-secondary leading-relaxed">{tool.description}</p>
-                <div className="mt-4 flex items-center gap-1 text-xs font-medium text-brand">
+                <div className="mt-4 flex items-center gap-1 text-xs font-medium text-brand" aria-hidden="true">
                   <span>Öffnen</span>
-                  <svg className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <svg className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                   </svg>
                 </div>
               </button>
-            </div>
+            </li>
           ))}
-        </div>
+        </ul>
       </div>
-    </div>
+    </main>
   );
 }

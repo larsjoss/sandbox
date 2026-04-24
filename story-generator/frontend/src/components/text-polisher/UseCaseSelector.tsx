@@ -49,7 +49,7 @@ export function UseCaseSelector({ value, onChange, disabled }: Props) {
             role="tab"
             id={`tp-tab-${tab.id}`}
             aria-selected={isActive}
-            aria-controls={`tp-panel-${tab.id}`}
+            aria-controls={isActive ? `tp-panel-${tab.id}` : undefined}
             tabIndex={isActive ? 0 : -1}
             disabled={disabled}
             onClick={() => onChange(tab.id)}

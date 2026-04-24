@@ -1,5 +1,6 @@
 import { useState, FormEvent } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import { InlineError } from '../../shared/components';
 
 function EyeIcon() {
   return (
@@ -129,11 +130,7 @@ export function LoginForm() {
         </p>
       </div>
 
-      {error && (
-        <p role="alert" className="text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg px-3.5 py-2.5">
-          {error}
-        </p>
-      )}
+      {error && <InlineError message={error} />}
 
       <button
         type="submit"
