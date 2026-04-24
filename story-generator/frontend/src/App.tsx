@@ -3,6 +3,7 @@ import { useAuth } from './context/AuthContext';
 import { AuthPage } from './pages/AuthPage';
 import { ToolSelectionPage } from './pages/ToolSelectionPage';
 import { WorkspacePage } from './pages/WorkspacePage';
+import { TextPolisherPage } from './pages/TextPolisherPage';
 import { TopNav } from './components/layout/TopNav';
 
 /*
@@ -52,6 +53,7 @@ export default function App() {
           <Route path="/tools" element={<ToolSelectionPage />} />
           <Route path="/tools/story-generator" element={<WorkspacePage />} />
           <Route path="/tools/story-generator/:id" element={<WorkspacePage />} />
+          <Route path="/tools/text-polisher" element={<TextPolisherPage />} />
           {/* Weitere Tools werden hier als neue Routes ergänzt (AK-9). */}
         </Route>
 
