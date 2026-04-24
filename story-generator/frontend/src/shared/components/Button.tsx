@@ -47,7 +47,7 @@ export function Button({
       disabled={disabled || loading}
       title={title}
       aria-label={ariaLabel}
-      aria-busy={loading || undefined}
+      aria-busy={loading ? true : undefined}
       className={`${base} ${variants[variant]} ${sizes[size]} ${className}`}
     >
       {loading && (

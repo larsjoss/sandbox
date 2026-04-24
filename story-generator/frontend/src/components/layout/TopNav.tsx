@@ -37,12 +37,10 @@ export function TopNav() {
   return (
     <>
       {/*
-       * TopNav: persistente Tool-Navigation nach dem Login.
-       * Enthält Tool-Switcher, API-Key-Status, Einstellungen und Abmelden.
-       * Ersetzt die Settings/Logout-Buttons aus der Story-Generator-Sidebar,
-       * damit diese Aktionen tool-übergreifend verfügbar sind.
+       * WCAG 4.1.2 / 1.3.6 – <header> als Banner-Landmark mit aria-label,
+       * damit Screen Reader die Navigation von anderen Regionen unterscheiden kann.
        */}
-      <header className="shrink-0 h-12 flex items-center px-4 gap-6 bg-surface border-b border-edge z-20">
+      <header className="shrink-0 h-12 flex items-center px-4 gap-6 bg-surface border-b border-edge z-20" aria-label="Seitennavigation">
         {/* Brand */}
         <NavLink
           to="/tools"

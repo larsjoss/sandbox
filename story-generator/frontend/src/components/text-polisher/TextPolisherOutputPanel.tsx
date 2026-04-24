@@ -1,3 +1,4 @@
+import type { RefObject } from 'react';
 import ReactMarkdown from 'react-markdown';
 import rehypeSanitize from 'rehype-sanitize';
 import { CopyButton, LoadingSkeleton } from '../../shared/components';
@@ -5,13 +6,19 @@ import { CopyButton, LoadingSkeleton } from '../../shared/components';
 interface Props {
   output?: string;
   isLoading: boolean;
+  /** Ref auf den scrollbaren Inhaltsbereich für programmatischen Fokus nach Generierung. */
+  contentRef?: RefObject<HTMLDivElement>;
 }
 
-export function TextPolisherOutputPanel({ output, isLoading }: Props) {
+export function TextPolisherOutputPanel({ output, isLoading, contentRef }: Props) {
   const hasOutput = !!output;
 
   return (
-    <div className="flex flex-col h-full">
+    /*
+     * WCAG 1.3.6 – role="region" + aria-label macht den Output-Bereich zu einem
+     * navigierbaren Landmark, den Screen Reader per Schnellnavigation ansteuern können.
+     */
+    <div className="flex flex-col h-full" role="region" aria-label="Aufbereiteter Text">
       {/* Panel header mit CopyButton (UI-04: oben rechts) */}
       <div className="px-5 py-3.5 border-b border-edge shrink-0 flex items-center justify-between gap-3">
         <h2 className="text-xs font-semibold text-ink-secondary uppercase tracking-widest">
@@ -23,14 +30,15 @@ export function TextPolisherOutputPanel({ output, isLoading }: Props) {
       </div>
 
       {/*
-       * WCAG 1.3.1 – aria-live="polite" meldet neue Inhalte an Screen Reader.
-       * WCAG 2.4.7 – tabIndex={-1} für programmatischen Fokus nach Generierung.
+       * WCAG 4.1.3 – aria-live="polite": neue Inhalte werden Screen Readern gemeldet.
+       * tabIndex={-1}: ermöglicht programmatischen Fokus nach Generierung (AK-8).
        */}
       <div
+        ref={contentRef}
+        tabIndex={-1}
         aria-live="polite"
         aria-busy={isLoading}
-        aria-label="Aufbereiteter Text"
-        className="flex-1 overflow-y-auto"
+        className="flex-1 overflow-y-auto outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-inset"
       >
         {/* Skeleton während API-Call (UI-04) */}
         {isLoading && (
