@@ -4,11 +4,12 @@ interface ButtonProps {
   children: ReactNode;
   onClick?: () => void;
   type?: 'button' | 'submit' | 'reset';
-  variant?: 'primary' | 'secondary' | 'ghost';
+  variant?: 'primary' | 'secondary' | 'outline' | 'ghost';
   size?: 'sm' | 'md';
   disabled?: boolean;
   loading?: boolean;
   className?: string;
+  title?: string;
   'aria-label'?: string;
 }
 
@@ -21,6 +22,7 @@ export function Button({
   disabled,
   loading,
   className = '',
+  title,
   'aria-label': ariaLabel,
 }: ButtonProps) {
   const base =
@@ -29,6 +31,7 @@ export function Button({
   const variants: Record<string, string> = {
     primary: 'bg-brand hover:bg-brand-dark text-white',
     secondary: 'border border-edge text-ink-secondary hover:bg-edge-2',
+    outline: 'bg-surface border border-brand text-brand hover:bg-brand-light',
     ghost: 'text-ink-tertiary hover:text-ink hover:bg-edge-2',
   };
 
@@ -42,6 +45,7 @@ export function Button({
       type={type}
       onClick={onClick}
       disabled={disabled || loading}
+      title={title}
       aria-label={ariaLabel}
       aria-busy={loading || undefined}
       className={`${base} ${variants[variant]} ${sizes[size]} ${className}`}
