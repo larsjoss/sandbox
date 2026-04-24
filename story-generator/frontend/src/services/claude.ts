@@ -1,7 +1,4 @@
-import Anthropic from '@anthropic-ai/sdk';
-import type { TextBlock } from '@anthropic-ai/sdk/resources/messages';
-
-const API_KEY_SESSION_KEY = 'anthropic_api_key';
+import { getApiClient, extractTextContent } from '../shared/services/apiClient';
 
 const SYSTEM_PROMPT = `Du bist ein erfahrener Senior Software Engineer, der einem Product Owner dabei hilft, Anforderungen zu strukturieren. Du denkst kritisch wie jemand, der das Feature später implementieren muss. Du klärst Mehrdeutigkeiten, formulierst testbare Akzeptanzkriterien und identifizierst fehlende Informationen. Deine Outputs folgen immer exakt dem vorgegebenen Template. Sprache: Deutsch.
 
@@ -37,12 +34,6 @@ export interface HintAnswer {
   answer: string;
 }
 
-function getClient(): Anthropic {
-  const apiKey = sessionStorage.getItem(API_KEY_SESSION_KEY);
-  if (!apiKey) throw new Error('Kein API-Key konfiguriert. Bitte einloggen und API-Key eingeben.');
-  return new Anthropic({ apiKey, dangerouslyAllowBrowser: true });
-}
-
 function parseOutput(text: string): { generatedStory: string; refinementHints: string } {
   const parts = text.split(/^\*\*Refinement Hinweise\*\*/m);
   if (parts.length >= 2) {
@@ -62,25 +53,21 @@ export function extractTitle(generatedStory: string, fallback: string): string {
 export async function generateStory(
   rawInput: string,
 ): Promise<{ generatedStory: string; refinementHints: string }> {
-  const anthropic = getClient();
-  const response = await anthropic.messages.create({
+  const client = getApiClient();
+  const response = await client.messages.create({
     model: 'claude-sonnet-4-5',
     max_tokens: 2048,
     system: SYSTEM_PROMPT,
     messages: [{ role: 'user', content: rawInput }],
   });
-  const text = response.content
-    .filter((b): b is TextBlock => b.type === 'text')
-    .map((b) => b.text)
-    .join('');
-  return parseOutput(text);
+  return parseOutput(extractTextContent(response.content));
 }
 
 export async function refineStoryWithHints(
   currentStory: string,
   hintAnswers: HintAnswer[],
 ): Promise<{ generatedStory: string; refinementHints: string }> {
-  const anthropic = getClient();
+  const client = getApiClient();
   const pairs = hintAnswers
     .map(({ hint, answer }) => `[Hinweis]: ${hint}\n[Antwort]: ${answer}`)
     .join('\n\n');
@@ -88,32 +75,24 @@ export async function refineStoryWithHints(
     `Hier ist die aktuelle Story:\n\n${currentStory}\n\n` +
     `Bitte überarbeite die Story auf Basis der folgenden beantworteten Refinement-Hinweise. ` +
     `Behalte das bestehende Output-Template exakt bei.\n\nBeantwortete Hinweise:\n${pairs}`;
-  const response = await anthropic.messages.create({
+  const response = await client.messages.create({
     model: 'claude-sonnet-4-5',
     max_tokens: 2048,
     system: SYSTEM_PROMPT,
     messages: [{ role: 'user', content: userMessage }],
   });
-  const text = response.content
-    .filter((b): b is TextBlock => b.type === 'text')
-    .map((b) => b.text)
-    .join('');
-  return parseOutput(text);
+  return parseOutput(extractTextContent(response.content));
 }
 
 export async function refineStory(
   conversationHistory: ConversationMessage[],
 ): Promise<{ generatedStory: string; refinementHints: string }> {
-  const anthropic = getClient();
-  const response = await anthropic.messages.create({
+  const client = getApiClient();
+  const response = await client.messages.create({
     model: 'claude-sonnet-4-5',
     max_tokens: 2048,
     system: SYSTEM_PROMPT,
     messages: conversationHistory,
   });
-  const text = response.content
-    .filter((b): b is TextBlock => b.type === 'text')
-    .map((b) => b.text)
-    .join('');
-  return parseOutput(text);
+  return parseOutput(extractTextContent(response.content));
 }

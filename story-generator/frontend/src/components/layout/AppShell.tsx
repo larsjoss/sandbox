@@ -35,7 +35,7 @@ export function AppShell({ leftPanel, centerPanel, rightPanel }: Props) {
   };
 
   return (
-    <div className="h-screen overflow-hidden flex flex-col">
+    <div className="h-full overflow-hidden flex flex-col">
       {/* Mobile: Sidebar-Strip */}
       <div className="md:hidden shrink-0 border-b border-edge bg-surface">
         <Sidebar />

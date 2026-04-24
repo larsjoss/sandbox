@@ -1,37 +1,32 @@
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Navigate, Outlet, Route, Routes } from 'react-router-dom';
 import { useAuth } from './context/AuthContext';
 import { AuthPage } from './pages/AuthPage';
+import { ToolSelectionPage } from './pages/ToolSelectionPage';
 import { WorkspacePage } from './pages/WorkspacePage';
+import { TopNav } from './components/layout/TopNav';
 
-// Tab-Flow (Desktop):
-//   1. Skip-Link «Zum Inhalt springen» (nur bei Fokus sichtbar)
-//   2. [Sidebar] Story-Generator-Heading (nicht fokussierbar)
-//   3. [Sidebar] Einstellungen-Button
-//   4. [Sidebar] Abmelden-Button
-//   5. [Sidebar] Suchfeld
-//   6. [Sidebar] Story-Liste (je ein Button pro Story)
-//   7. [Sidebar] «Neue Story»-Button
-//   8. [Hauptbereich] Anforderungs-Textarea
-//   9. [Hauptbereich] «Story generieren»-Button
-//  10. [Hauptbereich] (opt.) Refinement-Textarea + «Story verfeinern»-Button
-//  11. [Story-Spalte] «Kopieren»-Button
-// Tab-Flow (Mobile): Skip-Link → Sidebar-Header-Buttons → Tab-Buttons (Arrow-Key-Navigation) → aktives Panel
-
-function ProtectedRoute({ children }: { children: React.ReactNode }) {
+/*
+ * ProtectedLayout: gemeinsamer Shell für alle authentifizierten Seiten.
+ * Enthält die persistente TopNav und stellt h-screen + flex-Spalte bereit,
+ * sodass untergeordnete Layouts (AppShell, ToolLayout) h-full nutzen können.
+ */
+function ProtectedLayout() {
   const { user } = useAuth();
   if (!user) return <Navigate to="/auth" replace />;
-  return <>{children}</>;
+  return (
+    <div className="h-screen flex flex-col overflow-hidden">
+      <TopNav />
+      <Outlet />
+    </div>
+  );
 }
 
 export default function App() {
   return (
     <>
       {/*
-       * WCAG 2.4.1 – Bypass Blocks (AA)
-       * Skip-Navigation als erstes fokussierbares Element der Seite.
-       * Sichtbar nur bei Tastatur-Fokus (focus:not-sr-only), sonst sr-only.
-       * Ziel: #main-content in AppShell.tsx.
-       * Kontrast: Weiss #fff auf brand #6366f1 ≈ 4.47:1 > 3:1 (WCAG 2.4.11 ✓)
+       * WCAG 2.4.1 – Bypass Blocks (AA): Skip-Navigation als erstes
+       * fokussierbares Element der Seite. Ziel: #main-content in AppShell.
        */}
       <a
         href="#main-content"
@@ -51,23 +46,18 @@ export default function App() {
 
       <Routes>
         <Route path="/auth" element={<AuthPage />} />
-        <Route
-          path="/"
-          element={
-            <ProtectedRoute>
-              <WorkspacePage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/stories/:id"
-          element={
-            <ProtectedRoute>
-              <WorkspacePage />
-            </ProtectedRoute>
-          }
-        />
-        <Route path="*" element={<Navigate to="/" replace />} />
+
+        <Route element={<ProtectedLayout />}>
+          <Route index element={<Navigate to="/tools" replace />} />
+          <Route path="/tools" element={<ToolSelectionPage />} />
+          <Route path="/tools/story-generator" element={<WorkspacePage />} />
+          <Route path="/tools/story-generator/:id" element={<WorkspacePage />} />
+          {/* Weitere Tools werden hier als neue Routes ergänzt (AK-9). */}
+        </Route>
+
+        {/* Legacy-URLs weiterleiten */}
+        <Route path="/stories/:id" element={<Navigate to="/tools/story-generator" replace />} />
+        <Route path="*" element={<Navigate to="/tools" replace />} />
       </Routes>
     </>
   );

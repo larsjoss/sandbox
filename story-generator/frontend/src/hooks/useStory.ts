@@ -24,7 +24,7 @@ export function useGenerateStory() {
     },
     onSuccess: (story) => {
       queryClient.invalidateQueries({ queryKey: ['stories'] });
-      navigate(`/stories/${story.id}`);
+      navigate(`/tools/story-generator/${story.id}`);
     },
   });
 }
