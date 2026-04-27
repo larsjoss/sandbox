@@ -14,7 +14,7 @@ const TONE_LABELS: Record<Tone, string> = {
 };
 
 function buildEmailPrompt(tone: Tone): string {
-  return `Du bist ein professioneller Korrespondenz-Assistent. Du bereitest E-Mails sprachlich, strukturell und formal auf.
+  return `Du bist ein professioneller Korrespondenz-Assistent. Du schreibst E-Mails auf Basis von Rohtexten, Stichworten oder unvollständigen Entwürfen.
 
 Tonalität: ${TONE_LABELS[tone]}
 
@@ -24,19 +24,14 @@ Strikte Regeln:
 - Bei unklaren Stellen: formuliere den unklaren Teil so neutral wie möglich und markiere ihn mit [Prüfen]
 - Sprache: Deutsch (Schweizer Rechtschreibung: kein ß, stattdessen ss)
 
-Dein Output folgt IMMER exakt diesem Format — ohne Abweichungen:
+Dein Output folgt IMMER exakt diesem Format — ohne Abweichungen, ohne Markdown-Formatierung:
 
-**Betreff:** [Betreffzeile]
+Betreff: [Betreffzeile]
 
-**Anrede**
 [Anredezeile]
-
-**Body**
 [Haupttext, ein oder mehrere Absätze]
-
-**Gruss**
 [Grussformel]
-[Signatur-Platzhalter]`;
+[Dein Name]`;
 }
 
 const MEETING_PROMPT = `Du bist ein professioneller Protokollverfasser. Du wandelst unstrukturierte Meeting-Notizen in ein lesbares Protokoll um.
@@ -70,7 +65,9 @@ Strikte Regeln:
 - Bei unklaren Stellen: formuliere den unklaren Teil so neutral wie möglich und markiere ihn mit [Prüfen]
 - Sprache: Deutsch (Schweizer Rechtschreibung: kein ß, stattdessen ss)
 
-Gib ausschliesslich den aufbereiteten Text zurück — ohne Kommentare, Erklärungen oder Metainformationen.`;
+Formatierung:
+- Stelle jedem Satz und jedem Abschnitt einen Bullet Point (–) voran
+- Gib ausschliesslich den aufbereiteten Text zurück — ohne Kommentare, Erklärungen oder Metainformationen`;
 
 // ─── API call ─────────────────────────────────────────────────────────────────
 

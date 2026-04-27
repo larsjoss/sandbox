@@ -62,6 +62,12 @@ export function TextPolisherPage() {
     polishMutation.mutate({ input: input.trim(), useCase, tone });
   };
 
+  const handleClear = () => {
+    setInput('');
+    setOutput(undefined);
+    polishMutation.reset();
+  };
+
   const showOutputMobile = hasOutput || isLoading;
 
   return (
@@ -84,6 +90,7 @@ export function TextPolisherPage() {
           onToneChange={setTone}
           onInputChange={setInput}
           onSubmit={handleSubmit}
+          onClear={handleClear}
         />
       </div>
 
@@ -91,6 +98,7 @@ export function TextPolisherPage() {
         className={`flex flex-col lg:flex-1 lg:overflow-y-auto ${!showOutputMobile ? 'hidden lg:flex lg:flex-col' : 'flex flex-col'}`}
       >
         <TextPolisherOutputPanel
+          useCase={useCase}
           output={output}
           isLoading={isLoading}
           contentRef={outputRef}
