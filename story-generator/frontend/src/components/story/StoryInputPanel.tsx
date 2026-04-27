@@ -1,6 +1,6 @@
 import { useState, FormEvent, useEffect } from 'react';
 import { useGenerateStory } from '../../hooks/useStory';
-import { Button, TextArea, InlineError } from '../../shared/components';
+import { Button, TextArea, InlineError, PanelHeader } from '../../shared/components';
 
 interface Props {
   onGeneratingChange?: (generating: boolean) => void;
@@ -26,14 +26,7 @@ export function StoryInputPanel({ onGeneratingChange }: Props) {
 
   return (
     <div className="flex flex-col h-full">
-      <div className="px-5 py-3.5 border-b border-edge shrink-0">
-        <h2
-          id="anforderung-heading"
-          className="text-xs font-semibold text-ink-secondary uppercase tracking-widest"
-        >
-          Anforderung
-        </h2>
-      </div>
+      <PanelHeader title="Anforderung" id="anforderung-heading" />
 
       <div className="flex-1 overflow-y-auto p-5">
         <section aria-labelledby="anforderung-heading">

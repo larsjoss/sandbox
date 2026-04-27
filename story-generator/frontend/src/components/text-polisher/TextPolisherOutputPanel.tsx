@@ -1,5 +1,5 @@
 import type { RefObject } from 'react';
-import { CopyButton, LoadingSkeleton, MarkdownOutput } from '../../shared/components';
+import { CopyButton, LoadingSkeleton, MarkdownOutput, PanelHeader } from '../../shared/components';
 
 interface Props {
   output?: string;
@@ -17,15 +17,10 @@ export function TextPolisherOutputPanel({ output, isLoading, contentRef }: Props
      * navigierbaren Landmark, den Screen Reader per Schnellnavigation ansteuern können.
      */
     <div className="flex flex-col h-full" role="region" aria-label="Aufbereiteter Text">
-      {/* Panel header mit CopyButton (UI-04: oben rechts) */}
-      <div className="px-5 py-3.5 border-b border-edge shrink-0 flex items-center justify-between gap-3">
-        <h2 className="text-xs font-semibold text-ink-secondary uppercase tracking-widest">
-          Aufbereiteter Text
-        </h2>
-        {hasOutput && !isLoading && (
-          <CopyButton text={output!} label="Aufbereiteter Text" />
-        )}
-      </div>
+      <PanelHeader
+        title="Aufbereiteter Text"
+        action={hasOutput && !isLoading ? <CopyButton text={output!} label="Aufbereiteter Text" /> : undefined}
+      />
 
       {/*
        * WCAG 4.1.3 – aria-live="polite": neue Inhalte werden Screen Readern gemeldet.
