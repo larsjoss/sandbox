@@ -4,8 +4,8 @@ import type { User } from '../types';
 const API_KEY_SESSION_KEY = 'anthropic_api_key';
 const SESSION_USER_KEY = 'session_user';
 
-const ALLOWED_EMAIL = 'lars_joss@bluewin.ch';
-const ALLOWED_PASSWORD = 'Test1234';
+const ALLOWED_EMAIL = import.meta.env.VITE_AUTH_EMAIL ?? 'lars_joss@bluewin.ch';
+const ALLOWED_PASSWORD = import.meta.env.VITE_AUTH_PASSWORD ?? 'Test1234';
 
 interface AuthContextType {
   user: User | null;

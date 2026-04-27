@@ -34,7 +34,7 @@ export interface HintAnswer {
   answer: string;
 }
 
-function parseOutput(text: string): { generatedStory: string; refinementHints: string } {
+export function parseOutput(text: string): { generatedStory: string; refinementHints: string } {
   const parts = text.split(/^\*\*Refinement Hinweise\*\*/m);
   if (parts.length >= 2) {
     return {
