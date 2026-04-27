@@ -1,7 +1,5 @@
 import type { RefObject } from 'react';
-import ReactMarkdown from 'react-markdown';
-import rehypeSanitize from 'rehype-sanitize';
-import { CopyButton, LoadingSkeleton } from '../../shared/components';
+import { CopyButton, LoadingSkeleton, MarkdownOutput } from '../../shared/components';
 
 interface Props {
   output?: string;
@@ -75,9 +73,7 @@ export function TextPolisherOutputPanel({ output, isLoading, contentRef }: Props
         {/* Output-Inhalt als Markdown */}
         {!isLoading && hasOutput && (
           <div className="px-6 py-5">
-            <div className="prose prose-sm max-w-none prose-headings:font-semibold prose-strong:font-semibold prose-p:text-ink prose-li:text-ink prose-headings:text-ink prose-strong:text-ink leading-relaxed">
-              <ReactMarkdown rehypePlugins={[rehypeSanitize]}>{output!}</ReactMarkdown>
-            </div>
+            <MarkdownOutput>{output!}</MarkdownOutput>
           </div>
         )}
       </div>

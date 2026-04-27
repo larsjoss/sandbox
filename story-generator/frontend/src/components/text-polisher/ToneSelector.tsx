@@ -18,8 +18,6 @@ interface Props {
 }
 
 export function ToneSelector({ value, onChange, disabled }: Props) {
-  const activeIdx = OPTIONS.findIndex((o) => o.id === value);
-
   const handleKeyDown = (e: React.KeyboardEvent, idx: number) => {
     let next = idx;
     if (e.key === 'ArrowRight') next = (idx + 1) % OPTIONS.length;

@@ -18,8 +18,6 @@ interface Props {
 }
 
 export function UseCaseSelector({ value, onChange, disabled }: Props) {
-  const activeIdx = TABS.findIndex((t) => t.id === value);
-
   const handleKeyDown = (e: React.KeyboardEvent, idx: number) => {
     let next = idx;
     if (e.key === 'ArrowRight') next = (idx + 1) % TABS.length;
