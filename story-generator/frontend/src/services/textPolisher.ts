@@ -66,7 +66,8 @@ Strikte Regeln:
 - Sprache: Deutsch (Schweizer Rechtschreibung: kein ß, stattdessen ss)
 
 Formatierung:
-- Stelle jedem Satz und jedem Abschnitt einen Bullet Point (–) voran
+- Stelle jedem Satz und jedem Abschnitt einen runden Bullet Point (•) voran
+- Jeder Bullet Point steht auf einer eigenen Zeile, gefolgt von einer Leerzeile
 - Gib ausschliesslich den aufbereiteten Text zurück — ohne Kommentare, Erklärungen oder Metainformationen`;
 
 // ─── API call ─────────────────────────────────────────────────────────────────
