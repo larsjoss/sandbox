@@ -68,7 +68,8 @@ export function LoginForm() {
 
       <div>
         <label htmlFor="login-apikey" className="block text-sm font-medium text-ink mb-1.5">
-          Anthropic API-Key
+          Anthropic API-Key{' '}
+          <span className="text-xs font-normal text-ink-tertiary">(optional)</span>
         </label>
         <div className="relative">
           <input
@@ -102,7 +103,7 @@ export function LoginForm() {
 
       {error && <InlineError message={error} />}
 
-      <Button type="submit" loading={loading} className="w-full mt-2">
+      <Button type="submit" loading={loading} className="w-full">
         {loading ? 'Anmelden…' : 'Anmelden'}
       </Button>
     </form>

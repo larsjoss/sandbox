@@ -54,11 +54,11 @@ export function ToneSelector({ value, onChange, disabled }: Props) {
               onClick={() => onChange(opt.id)}
               onKeyDown={(e) => handleKeyDown(e, idx)}
               className={[
-                'flex-1 py-2 text-xs font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-inset disabled:opacity-50 disabled:cursor-not-allowed',
+                'flex-1 py-2 text-xs font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-inset disabled:opacity-50 disabled:cursor-not-allowed',
                 idx > 0 ? 'border-l border-edge' : '',
                 isActive
-                  ? 'bg-brand text-white'
-                  : 'bg-surface text-ink-secondary hover:bg-edge-2 hover:text-ink',
+                  ? 'bg-brand text-white focus-visible:ring-white'
+                  : 'bg-surface text-ink-secondary hover:bg-edge-2 hover:text-ink focus-visible:ring-brand',
               ].join(' ')}
             >
               {opt.label}

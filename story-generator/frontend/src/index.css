@@ -26,3 +26,13 @@ input[type="password"]::-ms-clear { display: none; }
 /* Remove native disclosure triangle from <summary> — we render our own chevron */
 summary { list-style: none; }
 summary::-webkit-details-marker { display: none; }
+
+/* Fade-in when a tabpanel becomes visible (hidden attribute removed) */
+[role="tabpanel"]:not([hidden]) {
+  animation: panel-fade-in 150ms ease-out;
+}
+
+@keyframes panel-fade-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}

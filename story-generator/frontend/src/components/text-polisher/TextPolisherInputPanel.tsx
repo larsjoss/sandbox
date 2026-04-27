@@ -68,7 +68,8 @@ export function TextPolisherInputPanel({
             value={input}
             onChange={onInputChange}
             placeholder={PLACEHOLDERS[useCase]}
-            rows={12}
+            rows={6}
+            autoGrow
             disabled={isLoading}
           />
 
