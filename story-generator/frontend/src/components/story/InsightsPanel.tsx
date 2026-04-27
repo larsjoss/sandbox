@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import type { Story } from '../../types';
 import { useRefineStoryWithHints } from '../../hooks/useStory';
 import type { HintAnswer } from '../../services/claude';
-import { Button, InlineError } from '../../shared/components';
+import { Button, InlineError, LoadingSkeleton } from '../../shared/components';
 
 interface Props {
   story?: Story;
@@ -287,13 +287,7 @@ export function InsightsPanel({ story, isLoading, onRefiningChange }: Props) {
       {/* Scrollable hint content */}
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-2">
         {/* Loading skeleton */}
-        {isLoading && (
-          <div className="animate-pulse space-y-2" aria-hidden="true">
-            <div className="h-10 bg-edge rounded-xl w-full" />
-            <div className="h-10 bg-edge/60 rounded-xl w-full" />
-            <div className="h-10 bg-edge/40 rounded-xl w-full" />
-          </div>
-        )}
+        {isLoading && <LoadingSkeleton lines={3} />}
 
         {/* Empty state */}
         {!isLoading && !story && (

@@ -1,8 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import ReactMarkdown from 'react-markdown';
-import rehypeSanitize from 'rehype-sanitize';
 import type { Story } from '../../types';
-import { LoadingSkeleton, Button } from '../../shared/components';
+import { LoadingSkeleton, Button, MarkdownOutput } from '../../shared/components';
 
 interface Props {
   story?: Story;
@@ -73,8 +71,8 @@ export function StoryOutputPanel({ story, isLoading, isGenerating, isRefining }:
         aria-label="Generierte Story"
         className="flex-1 overflow-y-auto outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-inset"
       >
-        {/* Initial load skeleton */}
-        {isLoading && (
+        {/* Load / generate skeleton */}
+        {(isLoading || (busy && !story)) && (
           <div className="px-6 py-5">
             <LoadingSkeleton lines={7} />
           </div>
@@ -94,21 +92,10 @@ export function StoryOutputPanel({ story, isLoading, isGenerating, isRefining }:
           </div>
         )}
 
-        {/* Generating skeleton */}
-        {!isLoading && busy && !story && (
-          <div className="px-6 py-5">
-            <LoadingSkeleton lines={7} />
-          </div>
-        )}
-
         {/* Story content + copy button scrolling together */}
         {!isLoading && story && (
           <div className="px-6 py-5">
-            <div className="prose prose-sm max-w-none prose-headings:font-semibold prose-strong:font-semibold prose-p:text-ink prose-li:text-ink prose-headings:text-ink prose-strong:text-ink leading-relaxed">
-              <ReactMarkdown rehypePlugins={[rehypeSanitize]}>
-                {formatStoryMarkdown(story.generatedStory)}
-              </ReactMarkdown>
-            </div>
+            <MarkdownOutput>{formatStoryMarkdown(story.generatedStory)}</MarkdownOutput>
 
             {/*
              * WCAG 4.1.2 – aria-label benennt die Aktion; aria-live="polite".
