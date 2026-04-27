@@ -1,0 +1,146 @@
+# AI Tools — Frontend
+
+React 18 + TypeScript + Vite Single-Page-Application. Zwei Tools: **Story Generator** (User-Stories aus Anforderungen) und **Text Polisher** (Rohtexte aufbereiten). Build läuft vollständig im Browser; kein Backend ausser der Anthropic API.
+
+## Entwicklung
+
+```bash
+npm install
+npm run dev      # Vite Dev-Server auf http://localhost:5173
+npm run build    # tsc + Vite Production Build
+npm run preview  # Build lokal vorschauen
+```
+
+## Stack
+
+| Layer | Technologie |
+|---|---|
+| UI | React 18, TypeScript, JSX |
+| Styling | Tailwind CSS v3 (eigene Design-Tokens) |
+| Routing | React Router v6 |
+| Server-State | TanStack Query v5 (Mutations + Query-Invalidierung) |
+| API | @anthropic-ai/sdk (`dangerouslyAllowBrowser: true`) |
+| Persistenz | localStorage (Stories), sessionStorage (Auth + API-Key) |
+| Markdown | react-markdown + rehype-sanitize |
+
+## Auth
+
+Hardcodierte Credentials in `src/context/AuthContext.tsx` (Prototype). Login setzt `session_user` + `anthropic_api_key` in sessionStorage. Logout löscht beides. Der API-Key ist optional beim Login; er kann nachträglich über das Settings-Dialog in der TopNav geändert werden.
+
+## Ordnerstruktur
+
+```
+src/
+├── App.tsx                     Router + ProtectedLayout (TopNav + Outlet)
+├── index.css                   Global: focus-visible, tabpanel-fade, summary
+├── main.tsx                    ReactDOM root, QueryClient, Provider-Stack
+├── types/index.ts              Story, User, RefinementLog, Response-Typen
+│
+├── context/
+│   └── AuthContext.tsx         Auth-State, login/logout, setApiKey
+│
+├── shared/
+│   ├── services/
+│   │   └── apiClient.ts        getApiClient(), extractTextContent()
+│   └── components/             Shared Component Library (siehe unten)
+│
+├── services/
+│   ├── claude.ts               Story Generator API (generate, refineWithHints, refine)
+│   ├── textPolisher.ts         Text Polisher API (polishText, 3 System-Prompts)
+│   └── storage.ts              localStorage CRUD für Stories + Refinements
+│
+├── hooks/
+│   ├── useStory.ts             useStory, useGenerateStory, useRefineStoryWithHints, useRefineStory
+│   ├── useStories.ts           useStories (Liste), useDeleteStory
+│   └── useTextPolisher.ts      usePolishText Mutation
+│
+├── pages/
+│   ├── AuthPage.tsx            Login-Seite → /tools
+│   ├── ToolSelectionPage.tsx   Dashboard mit Tool-Cards
+│   ├── WorkspacePage.tsx       Story Generator (3-Panel via AppShell)
+│   └── TextPolisherPage.tsx    Text Polisher (Split-View, Use-Case-Tabs)
+│
+└── components/
+    ├── auth/LoginForm.tsx
+    ├── layout/AppShell.tsx     3-Spalten Desktop + Mobile Tabs (fade-animiert)
+    ├── layout/TopNav.tsx       Tool-Nav, API-Key-Indikator, Settings, Logout
+    ├── sidebar/                Sidebar, SearchBox, StoryListItem
+    ├── story/                  StoryInputPanel, StoryOutputPanel, InsightsPanel
+    └── text-polisher/          TextPolisherInputPanel, TextPolisherOutputPanel,
+                                UseCaseSelector, ToneSelector
+```
+
+## Shared Component Library
+
+`src/shared/components/` — alle via Barrel-Export `index.ts` importierbar.
+
+| Komponente | Props (Auswahl) | Verwendung |
+|---|---|---|
+| `Button` | `variant` (primary/secondary/outline/ghost), `size` (sm/md), `loading`, `disabled` | Überall |
+| `TextArea` | `rows`, `autoGrow` (auto-height via scrollHeight), `disabled` | Input-Panels |
+| `CopyButton` | `text`, `label` | TextPolisherOutputPanel |
+| `LoadingSkeleton` | `lines` | Output- und Insights-Panel |
+| `InlineError` | `message` | Formulare, Output-Panels |
+| `SettingsDialog` | `open`, `onClose` | TopNav |
+| `MarkdownOutput` | `children: string` | Beide Output-Panels |
+| `PanelHeader` | `title`, `id?`, `action?` (ReactNode) | Alle 5 Panels |
+| `RevealButton` | `show`, `onToggle`, `label` | LoginForm, SettingsDialog |
+
+## Design-Tokens (Tailwind)
+
+```
+brand        #1C2B1E  (dark green) / brand-dark / brand-light #E8EFE9
+canvas       #F5F0E8  (Hintergrund Seiten)
+surface      #FAFAF8  (Karten, Panels, Inputs)
+ink          #1C2420  / ink-secondary #5C5852 / ink-tertiary #6B6860
+edge         #DDD8CF  (Rahmen) / edge-2 #EBE6DA (hover-Flächen)
+font-serif   Playfair Display (Überschriften)
+font-sans    Inter (Fliesstext)
+```
+
+## API-Klient
+
+`src/shared/services/apiClient.ts`:
+- `getApiClient()` — liest `anthropic_api_key` aus sessionStorage, wirft bei fehlendem Key
+- `extractTextContent(content)` — filtert TextBlock-Typen aus der Anthropic-Response
+
+Alle Services importieren ausschliesslich `getApiClient()` — kein direkter sessionStorage-Zugriff in Komponenten.
+
+## Story Generator
+
+**Modell:** `claude-sonnet-4-5`, `max_tokens: 2048`
+
+**Output-Format:** Markdown-Template mit fixen Sektionen (`**Titel**`, `**Ausgangslage**`, `**Akzeptanzkriterien**`, `**Weitere Informationen**`, `**Refinement Hinweise**`). Die Sektion `**Refinement Hinweise**` wird beim Parsen (`claude.ts: parseOutput`) vom Haupt-Story-Text abgetrennt und separat in `Story.refinementHints` gespeichert.
+
+**Refinement-Flow:**
+1. `useRefineStoryWithHints` — übergibt beantwortete Hint-Paare (Frage + Antwort)
+2. `useRefineStory` — freie Instruktion, baut vollständige Conversation-History auf
+
+**Persistenz:** localStorage (`sg_stories`, `sg_refinements`). Keys sind `crypto.randomUUID()`.
+
+## Text Polisher
+
+**Modell:** `claude-sonnet-4-5`, `max_tokens: 2048`
+
+**Use Cases:** `email` (dynamischer System-Prompt mit Ton-Parameter), `meeting` (Protokoll-Format), `freetext` (Lektor-Modus). Die drei System-Prompts verbieten explizit das Erfinden von Inhalten; unklare Stellen werden mit `[Prüfen]` markiert.
+
+**Ton-Auswahl** (`formell` / `neutral` / `informell`) ist nur beim `email` Use-Case sichtbar.
+
+## Accessibility (WCAG 2.1 AA)
+
+- Skip-Link auf `#main-content` (App.tsx, erstes fokussierbares Element)
+- `<header aria-label>`, `<main id="main-content">`, `role="region"` auf Output-Panels
+- `role="tablist/tab"` in AppShell (Mobile), UseCaseSelector; Arrow-Key-Navigation
+- `role="radiogroup/radio"` in ToneSelector; Arrow-Key-Navigation
+- `role="alert" aria-live="assertive"` auf InlineError
+- `role="status" aria-live="polite"` auf LoadingSkeleton und Refinement-Banner
+- Programmatischer Fokus nach Generierung (beide Output-Panels, `tabIndex={-1}`)
+- `RevealButton`: `min-h-[44px] min-w-[44px]` (WCAG 2.5.5 Touch Target)
+- Fokus-Ring: weiss (`ring-white`) auf dunklem Brand-Hintergrund (ToneSelector aktiver Button)
+
+## Bekannte Einschränkungen
+
+- **Auth ist ein Prototype**: Credentials sind hardcodiert (`lars_joss@bluewin.ch` / `Test1234`). Für Produktion durch echte Authentifizierung ersetzen.
+- **API-Key im Browser**: `dangerouslyAllowBrowser: true` — nur für Single-User-Prototypen geeignet.
+- **Text Polisher Zustand**: Wird bei Navigation zum anderen Tool verworfen (kein Persist). Bewusste Entscheidung.
+- **Keine Tests**: Kein Unit-/Integration-Test-Setup vorhanden.
