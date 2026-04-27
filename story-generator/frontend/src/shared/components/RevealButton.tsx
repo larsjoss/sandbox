@@ -31,7 +31,7 @@ export function RevealButton({ show, onToggle, label }: Props) {
       type="button"
       onClick={onToggle}
       aria-label={label}
-      className="absolute right-1 top-1/2 -translate-y-1/2 min-h-[44px] min-w-[44px] flex items-center justify-center -m-1 text-ink-tertiary hover:text-ink-secondary rounded focus:outline-none focus:ring-2 focus:ring-brand bg-surface z-10"
+      className="shrink-0 min-h-[44px] min-w-[44px] flex items-center justify-center pr-1 text-ink-tertiary hover:text-ink-secondary rounded focus:outline-none focus:ring-2 focus:ring-brand focus:ring-inset"
     >
       {show ? <EyeOffIcon /> : <EyeIcon />}
     </button>

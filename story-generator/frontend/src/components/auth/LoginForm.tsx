@@ -47,14 +47,14 @@ export function LoginForm() {
         <label htmlFor="login-password" className="block text-sm font-medium text-ink mb-1.5">
           Passwort
         </label>
-        <div className="relative">
+        <div className="flex items-center border border-edge rounded-lg bg-surface focus-within:ring-2 focus-within:ring-brand focus-within:border-transparent">
           <input
             id="login-password"
             type={showPassword ? 'text' : 'password'}
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full border border-edge rounded-lg px-3.5 py-2.5 pr-12 text-sm text-ink bg-surface focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent placeholder:text-ink-tertiary"
+            className="flex-1 min-w-0 bg-transparent px-3.5 py-2.5 text-sm text-ink focus:outline-none placeholder:text-ink-tertiary"
             placeholder="Passwort eingeben"
             autoComplete="current-password"
           />
@@ -71,13 +71,13 @@ export function LoginForm() {
           Anthropic API-Key{' '}
           <span className="text-xs font-normal text-ink-tertiary">(optional)</span>
         </label>
-        <div className="relative">
+        <div className="flex items-center border border-edge rounded-lg bg-surface focus-within:ring-2 focus-within:ring-brand focus-within:border-transparent">
           <input
             id="login-apikey"
             type={showApiKey ? 'text' : 'password'}
             value={apiKey}
             onChange={(e) => setApiKey(e.target.value)}
-            className="w-full border border-edge rounded-lg px-3.5 py-2.5 pr-12 text-sm text-ink bg-surface focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent placeholder:text-ink-tertiary"
+            className="flex-1 min-w-0 bg-transparent px-3.5 py-2.5 text-sm text-ink focus:outline-none placeholder:text-ink-tertiary"
             placeholder="sk-ant-…"
             autoComplete="off"
             aria-describedby="login-apikey-hint"

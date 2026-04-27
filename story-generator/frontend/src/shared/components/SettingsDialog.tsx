@@ -65,7 +65,7 @@ export function SettingsDialog({ open, onClose }: Props) {
           <label htmlFor="settings-apikey" className="block text-sm font-medium text-ink mb-1">
             Anthropic API-Key
           </label>
-          <div className="relative">
+          <div className="flex items-center border border-edge rounded-lg bg-surface focus-within:ring-2 focus-within:ring-brand focus-within:border-transparent">
             <input
               ref={inputRef}
               id="settings-apikey"
@@ -74,7 +74,7 @@ export function SettingsDialog({ open, onClose }: Props) {
               onChange={(e) => setValue(e.target.value)}
               placeholder="sk-ant-…"
               autoComplete="off"
-              className="w-full border border-edge rounded-lg px-3 py-2 pr-10 text-sm text-ink bg-surface placeholder:text-ink-tertiary focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent"
+              className="flex-1 min-w-0 bg-transparent px-3 py-2 text-sm text-ink placeholder:text-ink-tertiary focus:outline-none"
               onKeyDown={(e) => e.key === 'Enter' && handleSave()}
             />
             <RevealButton
@@ -97,11 +97,11 @@ export function SettingsDialog({ open, onClose }: Props) {
         </div>
 
         <div className="flex gap-2 mt-5">
-          <Button variant="secondary" onClick={onClose} className="flex-1">
-            Abbrechen
-          </Button>
           <Button onClick={handleSave} disabled={!value.trim()} className="flex-1">
             Speichern
+          </Button>
+          <Button variant="secondary" onClick={onClose} className="flex-1">
+            Abbrechen
           </Button>
         </div>
       </div>
