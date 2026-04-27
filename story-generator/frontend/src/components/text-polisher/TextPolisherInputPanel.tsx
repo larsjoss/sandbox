@@ -13,9 +13,21 @@ const LABELS: Record<UseCase, string> = {
 };
 
 const PLACEHOLDERS: Record<UseCase, string> = {
-  email: 'Gib deinen Rohentwurf, Stichworte oder eine unvollständige E-Mail ein.',
-  meeting: 'Gib deine Meeting-Notizen, Stichworte oder Bullet Points ein.',
-  freetext: 'Gib deinen Rohtext, Notizen oder Entwurf ein.',
+  email: 'Gib hier den Rohtext Deiner E-Mail ein. Ich schreibe sie dann für Dich.',
+  meeting: 'Gib hier Deine Notizen & Bullet Points ein. Ich fasse sie dann für Dich zusammen.',
+  freetext: 'Gib hier Deine Notizen oder Deinen Rohtext ein. Ich bereite sie dann für Dich auf.',
+};
+
+const SUBMIT_LABELS: Record<UseCase, string> = {
+  email: 'E-Mail schreiben',
+  meeting: 'Meetingnotiz erstellen',
+  freetext: 'Text aufbereiten',
+};
+
+const LOADING_LABELS: Record<UseCase, string> = {
+  email: 'Wird geschrieben…',
+  meeting: 'Wird erstellt…',
+  freetext: 'Wird aufbereitet…',
 };
 
 interface Props {
@@ -28,6 +40,7 @@ interface Props {
   onToneChange: (tone: Tone) => void;
   onInputChange: (value: string) => void;
   onSubmit: (e: FormEvent) => void;
+  onClear: () => void;
 }
 
 export function TextPolisherInputPanel({
@@ -40,6 +53,7 @@ export function TextPolisherInputPanel({
   onToneChange,
   onInputChange,
   onSubmit,
+  onClear,
 }: Props) {
   return (
     <div className="flex flex-col h-full">
@@ -91,8 +105,20 @@ export function TextPolisherInputPanel({
             loading={isLoading}
             className="w-full"
           >
-            {isLoading ? 'Wird aufbereitet…' : 'Text aufbereiten'}
+            {isLoading ? LOADING_LABELS[useCase] : SUBMIT_LABELS[useCase]}
           </Button>
+
+          {/* Clear-Button: nur sichtbar wenn Eingabe vorhanden */}
+          {input.trim() && !isLoading && (
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={onClear}
+              className="w-full"
+            >
+              Eingabe löschen
+            </Button>
+          )}
         </form>
       </div>
     </div>
