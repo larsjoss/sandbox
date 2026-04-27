@@ -1,6 +1,7 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import type { Story } from '../../types';
 import { LoadingSkeleton, Button, MarkdownOutput, PanelHeader } from '../../shared/components';
+import { useCopyToClipboard } from '../../hooks/useCopyToClipboard';
 
 interface Props {
   story?: Story;
@@ -23,7 +24,7 @@ function formatStoryMarkdown(raw: string): string {
 export function StoryOutputPanel({ story, isLoading, isGenerating, isRefining }: Props) {
   const outputRef = useRef<HTMLDivElement>(null);
   const wasGenerating = useRef(false);
-  const [copied, setCopied] = useState(false);
+  const { copied, copy } = useCopyToClipboard();
 
   useEffect(() => {
     if (wasGenerating.current && !isGenerating && story) {
@@ -31,17 +32,6 @@ export function StoryOutputPanel({ story, isLoading, isGenerating, isRefining }:
     }
     wasGenerating.current = isGenerating ?? false;
   }, [isGenerating, story]);
-
-  const handleCopy = async () => {
-    if (!story) return;
-    try {
-      await navigator.clipboard.writeText(story.generatedStory);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch {
-      alert('Kopieren fehlgeschlagen. Bitte manuell kopieren.');
-    }
-  };
 
   const busy = isGenerating ?? false;
 
@@ -100,7 +90,7 @@ export function StoryOutputPanel({ story, isLoading, isGenerating, isRefining }:
              * Full-width am Ende des Inhalts: bewusste UX (erst lesen, dann kopieren).
              */}
             <Button
-              onClick={handleCopy}
+              onClick={() => story && copy(story.generatedStory)}
               variant="primary"
               aria-label={copied ? 'Story kopiert' : 'Story kopieren'}
               className="mt-6 w-full"

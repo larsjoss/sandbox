@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCopyToClipboard } from '../../hooks/useCopyToClipboard';
 
 interface Props {
   text: string;
@@ -6,17 +6,7 @@ interface Props {
 }
 
 export function CopyButton({ text, label = 'Inhalt' }: Props) {
-  const [copied, setCopied] = useState(false);
-
-  const handleCopy = async () => {
-    try {
-      await navigator.clipboard.writeText(text);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch {
-      alert('Kopieren fehlgeschlagen. Bitte manuell kopieren.');
-    }
-  };
+  const { copied, copy } = useCopyToClipboard();
 
   return (
     /*
@@ -24,7 +14,7 @@ export function CopyButton({ text, label = 'Inhalt' }: Props) {
      * aria-live="polite" meldet Statuswechsel an Screen Reader.
      */
     <button
-      onClick={handleCopy}
+      onClick={() => copy(text)}
       aria-label={copied ? `${label} kopiert` : `${label} kopieren`}
       aria-live="polite"
       className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-ink-secondary bg-edge/60 hover:bg-edge rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-1"
