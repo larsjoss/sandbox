@@ -5,3 +5,5 @@ export { LoadingSkeleton } from './LoadingSkeleton';
 export { InlineError } from './InlineError';
 export { SettingsDialog } from './SettingsDialog';
 export { MarkdownOutput } from './MarkdownOutput';
+export { PanelHeader } from './PanelHeader';
+export { RevealButton } from './RevealButton';

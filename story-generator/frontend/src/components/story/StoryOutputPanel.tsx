@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import type { Story } from '../../types';
-import { LoadingSkeleton, Button, MarkdownOutput } from '../../shared/components';
+import { LoadingSkeleton, Button, MarkdownOutput, PanelHeader } from '../../shared/components';
 
 interface Props {
   story?: Story;
@@ -47,9 +47,7 @@ export function StoryOutputPanel({ story, isLoading, isGenerating, isRefining }:
 
   return (
     <div className="flex flex-col h-full">
-      <div className="px-5 py-3.5 border-b border-edge shrink-0">
-        <h2 className="text-xs font-semibold text-ink-secondary uppercase tracking-widest">Story</h2>
-      </div>
+      <PanelHeader title="Story" />
 
       {/* Non-blocking refinement banner (ANF-06) */}
       {isRefining && (

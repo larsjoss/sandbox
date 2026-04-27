@@ -1,6 +1,6 @@
 import type { FormEvent } from 'react';
 import type { UseCase, Tone } from '../../hooks/useTextPolisher';
-import { Button, TextArea, InlineError } from '../../shared/components';
+import { Button, TextArea, InlineError, PanelHeader } from '../../shared/components';
 import { UseCaseSelector } from './UseCaseSelector';
 import { ToneSelector } from './ToneSelector';
 
@@ -43,12 +43,7 @@ export function TextPolisherInputPanel({
 }: Props) {
   return (
     <div className="flex flex-col h-full">
-      {/* Panel header */}
-      <div className="px-5 py-3.5 border-b border-edge shrink-0">
-        <h2 className="text-xs font-semibold text-ink-secondary uppercase tracking-widest">
-          Eingabe
-        </h2>
-      </div>
+      <PanelHeader title="Eingabe" />
 
       {/*
        * Use-Case-Auswahl (UI-01): Tab-Navigation mit ARIA tablist.
