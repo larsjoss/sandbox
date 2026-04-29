@@ -34,6 +34,17 @@ export interface HintAnswer {
   answer: string;
 }
 
+// Visual formatting applied at render time — stored data is never mutated.
+// 1. Standalone bold headers **Foo** → **Foo:**
+// 2. Title line  **Titel** — text → **Titel:** — text
+// 3. AK list items  - AK-1: text → - **AK-1:** text
+export function formatStoryMarkdown(raw: string): string {
+  return raw
+    .replace(/^(\*\*[^*\n]+?)\*\*(\s*—)/gm, '$1:**$2')
+    .replace(/^\*\*([^*\n]+?)(?<!:)\*\*\s*$/gm, '**$1:**')
+    .replace(/^([ \t]*[-*][ \t]+)(AK-\d+):/gm, '$1**$2:**');
+}
+
 export function parseOutput(text: string): { generatedStory: string; refinementHints: string } {
   const parts = text.split(/^\*\*Refinement Hinweise\*\*/m);
   if (parts.length >= 2) {
@@ -46,6 +57,7 @@ export function parseOutput(text: string): { generatedStory: string; refinementH
 }
 
 export function extractTitle(generatedStory: string, fallback: string): string {
+
   const match = /^\*\*Titel\*\*\s*[—–-]\s*(.+)$/m.exec(generatedStory);
   return match ? match[1].trim() : fallback.slice(0, 60);
 }

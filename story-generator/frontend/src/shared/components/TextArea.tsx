@@ -44,7 +44,7 @@ export function TextArea({
         placeholder={placeholder}
         rows={rows}
         disabled={disabled}
-        className={`w-full border border-edge rounded-lg px-3 py-2.5 text-sm text-ink bg-surface placeholder:text-ink-tertiary focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed${autoGrow ? ' resize-none overflow-hidden' : ' resize-none'}`}
+        className={`w-full border border-edge rounded-lg px-3 py-2.5 text-sm text-ink bg-surface placeholder:text-ink-tertiary focus:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:border-transparent disabled:opacity-50 disabled:cursor-not-allowed${autoGrow ? ' resize-none overflow-hidden' : ' resize-none'}`}
       />
     </div>
   );

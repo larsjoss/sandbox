@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { parseOutput, extractTitle } from './claude';
+import { parseOutput, extractTitle, formatStoryMarkdown } from './claude';
 
 describe('parseOutput', () => {
   it('splits story and hints at the Refinement Hinweise heading', () => {
@@ -73,5 +73,35 @@ describe('extractTitle', () => {
   it('trims whitespace from extracted title', () => {
     const story = '**Titel** —   Titel mit Leerzeichen   ';
     expect(extractTitle(story, 'fb')).toBe('Titel mit Leerzeichen');
+  });
+});
+
+describe('formatStoryMarkdown', () => {
+  it('adds colon to standalone bold headers', () => {
+    expect(formatStoryMarkdown('**Ausgangslage**')).toBe('**Ausgangslage:**');
+  });
+
+  it('does not double-colon an already-colon header', () => {
+    expect(formatStoryMarkdown('**Ausgangslage:**')).toBe('**Ausgangslage:**');
+  });
+
+  it('preserves em dash in title line and adds colon', () => {
+    const input = '**Titel** — Mein Feature';
+    expect(formatStoryMarkdown(input)).toBe('**Titel:** — Mein Feature');
+  });
+
+  it('bolds AK identifiers in list items', () => {
+    const input = '- AK-1: Erster Test';
+    expect(formatStoryMarkdown(input)).toBe('- **AK-1:** Erster Test');
+  });
+
+  it('bolds AK identifiers with multi-digit numbers', () => {
+    const input = '- AK-12: Zwölfter Test';
+    expect(formatStoryMarkdown(input)).toBe('- **AK-12:** Zwölfter Test');
+  });
+
+  it('does not modify plain text lines', () => {
+    const input = 'Normaler Fliesstext ohne Markdown.';
+    expect(formatStoryMarkdown(input)).toBe(input);
   });
 });

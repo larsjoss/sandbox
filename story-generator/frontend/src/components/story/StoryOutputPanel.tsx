@@ -2,23 +2,13 @@ import { useEffect, useRef } from 'react';
 import type { Story } from '../../types';
 import { LoadingSkeleton, Button, MarkdownOutput, PanelHeader } from '../../shared/components';
 import { useCopyToClipboard } from '../../hooks/useCopyToClipboard';
+import { formatStoryMarkdown } from '../../services/claude';
 
 interface Props {
   story?: Story;
   isLoading?: boolean;
   isGenerating?: boolean;
   isRefining?: boolean;
-}
-
-// Visual formatting applied at render time (stored data is unchanged).
-// 1. Standalone bold headers **Foo** → **Foo:**
-// 2. Title line **Titel** — text → **Titel:** — text
-// 3. AK list items  - AK-1: text → - **AK-1:** text
-function formatStoryMarkdown(raw: string): string {
-  return raw
-    .replace(/^(\*\*[^*\n]+?)\*\*(\s*—)/gm, '$1:**$2')
-    .replace(/^\*\*([^*\n]+?)\*\*\s*$/gm, '**$1:**')
-    .replace(/^([ \t]*[-*][ \t]+)(AK-\d+):/gm, '$1**$2:**');
 }
 
 export function StoryOutputPanel({ story, isLoading, isGenerating, isRefining }: Props) {

@@ -11,9 +11,8 @@ export function useStories(q: string) {
 export function useDeleteStory() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (id: string) => {
+    mutationFn: async (id: string) => {
       storage.deleteStory(id);
-      return Promise.resolve();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['stories'] });
