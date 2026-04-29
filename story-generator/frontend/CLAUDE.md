@@ -78,7 +78,7 @@ src/
 |---|---|---|
 | `Button` | `variant` (primary/secondary/outline/ghost), `size` (sm/md), `loading`, `disabled` | Überall |
 | `TextArea` | `rows`, `autoGrow` (auto-height via scrollHeight), `disabled` | Input-Panels |
-| `CopyButton` | `text`, `label` | TextPolisherOutputPanel |
+| `CopyButton` | `text`, `label` | StoryOutputPanel, TextPolisherOutputPanel (vollbreiter Primary-Button am Ende des Outputs) |
 | `LoadingSkeleton` | `lines` | Output- und Insights-Panel |
 | `InlineError` | `message` | Formulare, Output-Panels |
 | `SettingsDialog` | `open`, `onClose` | TopNav |
@@ -126,6 +126,11 @@ Alle Services importieren ausschliesslich `getApiClient()` — kein direkter ses
 
 **Ton-Auswahl** (`formell` / `neutral` / `informell`) ist nur beim `email` Use-Case sichtbar.
 
+**Output-Formate:**
+- `email`: `Betreff: [Zeile]` (Zeile 1), Leerzeile, dann Fliesstext-Body (Anrede + Haupttext + Grussformel + `[Absender]`). Kein Markdown, keine Labels.
+- `meeting`: Markdown-Protokoll mit Abschnitten `**Datum**`, `**Teilnehmer**`, `**Kernpunkte**`, `**Beschlüsse**`, `**Next Steps**` — nur Abschnitte mit vorhandenen Infos.
+- `freetext`: Bullet Points (`•`), jeder auf eigener Zeile mit nachfolgender Leerzeile.
+
 ## Accessibility (WCAG 2.1 AA)
 
 - Skip-Link auf `#main-content` (App.tsx, erstes fokussierbares Element)
@@ -138,9 +143,26 @@ Alle Services importieren ausschliesslich `getApiClient()` — kein direkter ses
 - `RevealButton`: `min-h-[44px] min-w-[44px]` (WCAG 2.5.5 Touch Target)
 - Fokus-Ring: weiss (`ring-white`) auf dunklem Brand-Hintergrund (ToneSelector aktiver Button)
 
+## Tests
+
+Vitest + @testing-library/react + jsdom. Konfiguration: `vitest.config.ts`, Setup: `src/test/setup.ts`.
+
+```bash
+npm run test          # Watch-Mode
+npm run test:run      # Single-Run
+npm run test:coverage # Coverage-Report
+```
+
+| Datei | Was getestet |
+|---|---|
+| `UseCaseSelector.test.tsx` | Tab-Rendering, ARIA, Keyboard-Navigation |
+| `ToneSelector.test.tsx` | Radio-Gruppe, ARIA, Keyboard-Navigation |
+| `useCopyToClipboard.test.ts` | copied-State, Timeout, Clipboard-API |
+| `claude.test.ts` | `parseOutput` — Story/Hints-Trennung |
+| `storage.test.ts` | localStorage CRUD für Stories + Refinements |
+
 ## Bekannte Einschränkungen
 
-- **Auth ist ein Prototype**: Credentials sind hardcodiert (`lars_joss@bluewin.ch` / `Test1234`). Für Produktion durch echte Authentifizierung ersetzen.
+- **Auth ist ein Prototype**: Credentials werden aus `VITE_AUTH_EMAIL` / `VITE_AUTH_PASSWORD` gelesen (Fallback: hardcodierte Werte). Für Multi-User-Betrieb durch echte Authentifizierung ersetzen (Supabase empfohlen).
 - **API-Key im Browser**: `dangerouslyAllowBrowser: true` — nur für Single-User-Prototypen geeignet.
 - **Text Polisher Zustand**: Wird bei Navigation zum anderen Tool verworfen (kein Persist). Bewusste Entscheidung.
-- **Keine Tests**: Kein Unit-/Integration-Test-Setup vorhanden.

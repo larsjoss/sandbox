@@ -31,7 +31,7 @@ Betreff: [Betreffzeile]
 [Anredezeile]
 [Haupttext, ein oder mehrere Absätze]
 [Grussformel]
-[Dein Name]`;
+[Absender]`;
 }
 
 const MEETING_PROMPT = `Du bist ein professioneller Protokollverfasser. Du wandelst unstrukturierte Meeting-Notizen in ein lesbares Protokoll um.
@@ -93,5 +93,13 @@ export async function polishText(
     messages: [{ role: 'user', content: input }],
   });
 
-  return extractTextContent(response.content);
+  const text = extractTextContent(response.content);
+
+  if (useCase === 'email' && !text.trimStart().startsWith('Betreff:')) {
+    throw new Error(
+      'Unerwartetes E-Mail-Format: Antwort beginnt nicht mit "Betreff:". Bitte erneut versuchen.',
+    );
+  }
+
+  return text;
 }
