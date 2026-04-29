@@ -51,7 +51,6 @@ export function useRefineStoryWithHints(id: string) {
         return { ...old, story };
       });
       queryClient.invalidateQueries({ queryKey: ['stories'] });
-      queryClient.invalidateQueries({ queryKey: ['story', id] });
     },
   });
 }
@@ -88,7 +87,6 @@ export function useRefineStory(id: string) {
         return { ...old, story };
       });
       queryClient.invalidateQueries({ queryKey: ['stories'] });
-      queryClient.invalidateQueries({ queryKey: ['story', id] });
     },
   });
 }

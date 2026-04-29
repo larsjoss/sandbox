@@ -1,6 +1,6 @@
 # AI Tools — Frontend
 
-React 18 + TypeScript + Vite Single-Page-Application. Zwei Tools: **Story Generator** (User-Stories aus Anforderungen) und **Text Polisher** (Rohtexte aufbereiten). Build läuft vollständig im Browser; kein Backend ausser der Anthropic API.
+React 18 + TypeScript + Vite Single-Page-Application. Drei Tools: **Story Generator** (User-Stories aus Anforderungen), **Text Polisher** (Rohtexte aufbereiten) und **Test Case Generator** (Testpläne aus User Stories + Screenshots). Build läuft vollständig im Browser; kein Backend ausser der Anthropic API.
 
 ## Entwicklung
 
@@ -45,20 +45,25 @@ src/
 │   └── components/             Shared Component Library (siehe unten)
 │
 ├── services/
-│   ├── claude.ts               Story Generator API (generate, refineWithHints, refine)
+│   ├── claude.ts               Story Generator API (generate, refineWithHints, refine, formatStoryMarkdown)
 │   ├── textPolisher.ts         Text Polisher API (polishText, 3 System-Prompts)
+│   ├── testCaseGenerator.ts    Test Case Generator API (multimodal, buildJiraMarkdown, buildSingleTcMarkdown)
 │   └── storage.ts              localStorage CRUD für Stories + Refinements
 │
 ├── hooks/
 │   ├── useStory.ts             useStory, useGenerateStory, useRefineStoryWithHints, useRefineStory
 │   ├── useStories.ts           useStories (Liste), useDeleteStory
-│   └── useTextPolisher.ts      usePolishText Mutation
+│   ├── useTextPolisher.ts      usePolishText Mutation
+│   ├── useTestCaseGenerator.ts useGenerateTestCases Mutation
+│   ├── useDebounce.ts          useDebounce (debounced side-effect)
+│   └── useSessionState.ts      sessionStorage-backed useState
 │
 ├── pages/
 │   ├── AuthPage.tsx            Login-Seite → /tools
 │   ├── ToolSelectionPage.tsx   Dashboard mit Tool-Cards
 │   ├── WorkspacePage.tsx       Story Generator (3-Panel via AppShell)
-│   └── TextPolisherPage.tsx    Text Polisher (Split-View, Use-Case-Tabs)
+│   ├── TextPolisherPage.tsx    Text Polisher (Split-View, Use-Case-Tabs)
+│   └── TestCaseGeneratorPage.tsx  Test Case Generator (2-Screen: Input → Output)
 │
 └── components/
     ├── auth/LoginForm.tsx
@@ -66,8 +71,11 @@ src/
     ├── layout/TopNav.tsx       Tool-Nav, API-Key-Indikator, Settings, Logout
     ├── sidebar/                Sidebar, SearchBox, StoryListItem
     ├── story/                  StoryInputPanel, StoryOutputPanel, InsightsPanel
-    └── text-polisher/          TextPolisherInputPanel, TextPolisherOutputPanel,
-                                UseCaseSelector, ToneSelector
+    ├── text-polisher/          TextPolisherInputPanel, TextPolisherOutputPanel,
+    │                           UseCaseSelector, ToneSelector
+    └── test-case-generator/    TestCaseInputPanel, TestCaseOutputPanel,
+                                TestCaseCard, TestCaseSummaryBlock,
+                                TestCaseFilterBar, ScreenshotUpload, constants.ts
 ```
 
 ## Shared Component Library
@@ -131,6 +139,22 @@ Alle Services importieren ausschliesslich `getApiClient()` — kein direkter ses
 - `meeting`: Markdown-Protokoll mit Abschnitten `**Datum**`, `**Teilnehmer**`, `**Kernpunkte**`, `**Beschlüsse**`, `**Next Steps**` — nur Abschnitte mit vorhandenen Infos.
 - `freetext`: Bullet Points (`•`), jeder auf eigener Zeile mit nachfolgender Leerzeile.
 
+## Test Case Generator
+
+**Modell:** `claude-sonnet-4-5`, `max_tokens: 4000`
+
+**Multimodal:** Akzeptiert bis zu 3 Screenshots (PNG/JPG/WebP, max. 5 MB) als Base64-Image-Content-Blöcke. Erster Browser-Service in der Codebase mit Vision-Calls.
+
+**Timeout:** 60 Sekunden via `Promise.race` (längerer Call als Story Generator wegen JSON-Ausgabe).
+
+**Output:** JSON-Objekt (`TestPlan`) — kein Markdown. Code-Fence-Stripping im Parser (`/^```json\s*/i`).
+
+**Input-Quellen:** `story_ak` (Pflichtfeld Story-Text), `screenshot` (optional), `test_context` (optionales Accordion).
+
+**Export:** `buildJiraMarkdown(plan)` (vollständiger Plan), `buildSingleTcMarkdown(tc)` (einzelner TC).
+
+**Filter:** Type-Chips + Level-Segmented-Control (interner State, kein Persist). "Alles kopieren" exportiert immer den ungefilterten Plan.
+
 ## Accessibility (WCAG 2.1 AA)
 
 - Skip-Link auf `#main-content` (App.tsx, erstes fokussierbares Element)
@@ -165,4 +189,5 @@ npm run test:coverage # Coverage-Report
 
 - **Auth ist ein Prototype**: Credentials werden aus `VITE_AUTH_EMAIL` / `VITE_AUTH_PASSWORD` gelesen (Fallback: hardcodierte Werte). Für Multi-User-Betrieb durch echte Authentifizierung ersetzen (Supabase empfohlen).
 - **API-Key im Browser**: `dangerouslyAllowBrowser: true` — nur für Single-User-Prototypen geeignet.
-- **Text Polisher Zustand**: Wird bei Navigation zum anderen Tool verworfen (kein Persist). Bewusste Entscheidung.
+- **Text Polisher Zustand**: Wird via `useSessionState` in sessionStorage persistiert — bleibt innerhalb einer Browser-Session erhalten, wird beim Tab-Schliessen verworfen.
+- **Test Case Generator Zustand**: Ephemer (kein Persist). Screenshots sind nicht JSON-serialisierbar; State lebt nur in der aktuellen Page-Instanz.

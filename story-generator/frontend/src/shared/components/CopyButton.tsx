@@ -16,22 +16,21 @@ export function CopyButton({ text, label = 'Inhalt' }: Props) {
     <button
       onClick={() => copy(text)}
       aria-label={copied ? `${label} kopiert` : `${label} kopieren`}
-      aria-live="polite"
-      className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-ink-secondary bg-edge/60 hover:bg-edge rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-1"
+      className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-ink-secondary bg-edge/60 hover:bg-edge rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-1"
     >
       {copied ? (
         <>
           <svg className="w-3.5 h-3.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
           </svg>
-          <span className="text-green-600">Kopiert!</span>
+          <span className="text-green-600" aria-live="polite">Kopiert!</span>
         </>
       ) : (
         <>
           <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
           </svg>
-          Kopieren
+          <span aria-live="polite">Kopieren</span>
         </>
       )}
     </button>

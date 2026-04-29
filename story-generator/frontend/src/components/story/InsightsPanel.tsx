@@ -70,7 +70,7 @@ function AutoTextarea({ value, onChange, disabled, placeholder, id }: AutoTextar
       disabled={disabled}
       placeholder={placeholder}
       rows={2}
-      className="w-full resize-none overflow-hidden border border-edge rounded-lg px-3 py-2.5 text-xs text-ink bg-surface placeholder:text-ink-tertiary focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent leading-relaxed disabled:opacity-50 disabled:cursor-not-allowed transition-opacity"
+      className="w-full resize-none overflow-hidden border border-edge rounded-lg px-3 py-2.5 text-xs text-ink bg-surface placeholder:text-ink-tertiary focus:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:border-transparent leading-relaxed disabled:opacity-50 disabled:cursor-not-allowed transition-opacity"
       style={{ minHeight: '56px' }}
     />
   );
@@ -81,33 +81,24 @@ function AutoTextarea({ value, onChange, disabled, placeholder, id }: AutoTextar
 interface HintCardProps {
   hint: string;
   answer: string;
-  isOpen: boolean;
   disabled: boolean;
-  onToggle: () => void;
   onAnswerChange: (value: string) => void;
   cardId: string;
 }
 
-function HintCard({ hint, answer, isOpen, disabled, onToggle, onAnswerChange, cardId }: HintCardProps) {
+function HintCard({ hint, answer, disabled, onAnswerChange, cardId }: HintCardProps) {
   const isAnswered = answer.trim().length > 0;
   const inputId = `hint-answer-${cardId}`;
 
   return (
     /*
+     * Native <details>/<summary> disclosure — consistent with CategorySection.
      * Answered cards get a green-tinted left border accent (ANF-02).
-     * WCAG 4.1.2 – aria-expanded on the toggle button.
      */
-    <div className={`rounded-lg border overflow-hidden transition-colors ${
+    <details className={`group rounded-lg border overflow-hidden transition-colors ${
       isAnswered ? 'border-brand/40 bg-brand-light/20' : 'border-edge bg-surface'
     }`}>
-      {/* Toggle row */}
-      <button
-        onClick={onToggle}
-        disabled={disabled}
-        aria-expanded={isOpen}
-        aria-controls={isOpen ? inputId : undefined}
-        className="w-full flex items-start gap-2.5 px-3 py-2.5 text-left group focus:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-inset disabled:cursor-not-allowed"
-      >
+      <summary className="w-full flex items-start gap-2.5 px-3 py-2.5 text-left cursor-pointer select-none focus:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-inset disabled:cursor-not-allowed list-none [&::-webkit-details-marker]:hidden">
         {/* Answered / reply indicator */}
         <span
           className={`mt-0.5 shrink-0 transition-colors ${
@@ -116,12 +107,10 @@ function HintCard({ hint, answer, isOpen, disabled, onToggle, onAnswerChange, ca
           aria-hidden="true"
         >
           {isAnswered ? (
-            // Checkmark
             <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
             </svg>
           ) : (
-            // Reply arrow
             <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
             </svg>
@@ -132,30 +121,28 @@ function HintCard({ hint, answer, isOpen, disabled, onToggle, onAnswerChange, ca
 
         {/* Chevron */}
         <svg
-          className={`w-3 h-3 text-ink-tertiary shrink-0 mt-1 transition-transform duration-150 ${isOpen ? 'rotate-180' : ''}`}
+          className="w-3 h-3 text-ink-tertiary shrink-0 mt-1 transition-transform duration-150 group-open:rotate-180"
           fill="none" stroke="currentColor" viewBox="0 0 24 24"
           aria-hidden="true"
         >
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
         </svg>
-      </button>
+      </summary>
 
-      {/* Collapsible answer area (ANF-01) */}
-      {isOpen && (
-        <div className="px-3 pb-3">
-          <label htmlFor={inputId} className="sr-only">
-            Antwort auf: {hint}
-          </label>
-          <AutoTextarea
-            id={inputId}
-            value={answer}
-            onChange={onAnswerChange}
-            disabled={disabled}
-            placeholder="Antwort eingeben…"
-          />
-        </div>
-      )}
-    </div>
+      {/* Answer area (ANF-01) */}
+      <div className="px-3 pb-3">
+        <label htmlFor={inputId} className="sr-only">
+          Antwort auf: {hint}
+        </label>
+        <AutoTextarea
+          id={inputId}
+          value={answer}
+          onChange={onAnswerChange}
+          disabled={disabled}
+          placeholder="Antwort eingeben…"
+        />
+      </div>
+    </details>
   );
 }
 
@@ -165,14 +152,12 @@ interface CategorySectionProps {
   name: string;
   items: string[];
   answers: Record<string, string>;
-  openAnswers: Set<string>;
   disabled: boolean;
-  onToggleAnswer: (hint: string) => void;
   onAnswerChange: (hint: string, value: string) => void;
 }
 
 function CategorySection({
-  name, items, answers, openAnswers, disabled, onToggleAnswer, onAnswerChange,
+  name, items, answers, disabled, onAnswerChange,
 }: CategorySectionProps) {
   const cfg = CATEGORY_CONFIG[name] ?? { label: name, dot: 'bg-edge', text: 'text-ink-secondary' };
   const answeredCount = items.filter((h) => answers[h]?.trim()).length;
@@ -207,9 +192,7 @@ function CategorySection({
             cardId={`${name}-${i}`}
             hint={hint}
             answer={answers[hint] ?? ''}
-            isOpen={openAnswers.has(hint)}
             disabled={disabled}
-            onToggle={() => onToggleAnswer(hint)}
             onAnswerChange={(v) => onAnswerChange(hint, v)}
           />
         ))}
@@ -222,7 +205,6 @@ function CategorySection({
 
 export function InsightsPanel({ story, isLoading, onRefiningChange }: Props) {
   const [answers, setAnswers] = useState<Record<string, string>>({});
-  const [openAnswers, setOpenAnswers] = useState<Set<string>>(new Set());
   const refine = useRefineStoryWithHints(story?.id ?? '');
 
   const categories = story?.refinementHints ? parseHints(story.refinementHints) : [];
@@ -239,17 +221,7 @@ export function InsightsPanel({ story, isLoading, onRefiningChange }: Props) {
   const storyId = story?.id;
   useEffect(() => {
     setAnswers({});
-    setOpenAnswers(new Set());
   }, [storyId]);
-
-  const handleToggleAnswer = (hint: string) => {
-    setOpenAnswers((prev) => {
-      const next = new Set(prev);
-      if (next.has(hint)) next.delete(hint);
-      else next.add(hint);
-      return next;
-    });
-  };
 
   const handleAnswerChange = (hint: string, value: string) => {
     setAnswers((prev) => ({ ...prev, [hint]: value }));
@@ -269,7 +241,6 @@ export function InsightsPanel({ story, isLoading, onRefiningChange }: Props) {
         // ANF-05: clear answers on success
         onSuccess: () => {
           setAnswers({});
-          setOpenAnswers(new Set());
         },
       },
     );
@@ -303,19 +274,21 @@ export function InsightsPanel({ story, isLoading, onRefiningChange }: Props) {
           <p className="text-xs text-ink-tertiary leading-relaxed px-1">Keine offenen Punkte identifiziert.</p>
         )}
 
-        {/* Accordion with hint cards */}
-        {!isLoading && hasParsedCategories && categories.map((cat) => (
-          <CategorySection
-            key={cat.name}
-            name={cat.name}
-            items={cat.items}
-            answers={answers}
-            openAnswers={openAnswers}
-            disabled={refine.isPending}
-            onToggleAnswer={handleToggleAnswer}
-            onAnswerChange={handleAnswerChange}
-          />
-        ))}
+        {/* Accordion with hint cards — key=storyId re-mounts on story change, resetting all <details> */}
+        {!isLoading && hasParsedCategories && (
+          <div key={storyId} className="space-y-2">
+            {categories.map((cat) => (
+              <CategorySection
+                key={cat.name}
+                name={cat.name}
+                items={cat.items}
+                answers={answers}
+                disabled={refine.isPending}
+                onAnswerChange={handleAnswerChange}
+              />
+            ))}
+          </div>
+        )}
 
         {/* Fallback: raw text if parser found no categories */}
         {!isLoading && story?.refinementHints && !hasParsedCategories && (
