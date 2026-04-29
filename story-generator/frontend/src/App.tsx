@@ -4,6 +4,7 @@ import { AuthPage } from './pages/AuthPage';
 import { ToolSelectionPage } from './pages/ToolSelectionPage';
 import { WorkspacePage } from './pages/WorkspacePage';
 import { TextPolisherPage } from './pages/TextPolisherPage';
+import { TestCaseGeneratorPage } from './pages/TestCaseGeneratorPage';
 import { TopNav } from './components/layout/TopNav';
 
 /*
@@ -54,7 +55,7 @@ export default function App() {
           <Route path="/tools/story-generator" element={<WorkspacePage />} />
           <Route path="/tools/story-generator/:id" element={<WorkspacePage />} />
           <Route path="/tools/text-polisher" element={<TextPolisherPage />} />
-          {/* Weitere Tools werden hier als neue Routes ergänzt (AK-9). */}
+          <Route path="/tools/test-case-generator" element={<TestCaseGeneratorPage />} />
         </Route>
 
         {/* Legacy-URLs weiterleiten */}
