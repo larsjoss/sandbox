@@ -58,7 +58,7 @@ export function TestCaseFilterBar({
                 aria-checked={isActive}
                 onClick={() => onTypeToggle(type)}
                 className={[
-                  'px-2.5 py-1 rounded-full text-xs font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-1',
+                  'px-2.5 py-1 rounded-full text-xs font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-1',
                   isActive
                     ? 'bg-brand text-white'
                     : 'bg-canvas border border-edge text-ink-secondary hover:bg-edge-2 hover:text-ink',
