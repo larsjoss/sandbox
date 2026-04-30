@@ -178,6 +178,7 @@ export function GoalGeneratorPage() {
   if (screen === 'output') {
     return (
       <GoalGeneratorOutputPanel
+        mode={tab}
         variants={variants}
         isGenerating={generateMutation.isPending}
         generateError={generateMutation.error}
