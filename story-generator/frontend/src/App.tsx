@@ -6,6 +6,7 @@ import { WorkspacePage } from './pages/WorkspacePage';
 import { TextPolisherPage } from './pages/TextPolisherPage';
 import { TestCaseGeneratorPage } from './pages/TestCaseGeneratorPage';
 import { DocGeneratorPage } from './pages/DocGeneratorPage';
+import { GoalGeneratorPage } from './pages/GoalGeneratorPage';
 import { TopNav } from './components/layout/TopNav';
 
 /*
@@ -58,6 +59,7 @@ export default function App() {
           <Route path="/tools/text-polisher" element={<TextPolisherPage />} />
           <Route path="/tools/test-case-generator" element={<TestCaseGeneratorPage />} />
           <Route path="/tools/doc-generator" element={<DocGeneratorPage />} />
+          <Route path="/tools/goal-generator" element={<GoalGeneratorPage />} />
         </Route>
 
         {/* Legacy-URLs weiterleiten */}

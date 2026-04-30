@@ -132,3 +132,7 @@ export interface FeatureDocInput {
 export type GenerateDocParams =
   | { mode: 'story'; input: StoryDocInput; screenshots: UploadedFile[] }
   | { mode: 'feature'; input: FeatureDocInput; screenshots: UploadedFile[] };
+
+// ─── Goal Generator ───────────────────────────────────────────────────────────
+
+export type GoalMode = 'sprint-goal' | 'pi-objective';

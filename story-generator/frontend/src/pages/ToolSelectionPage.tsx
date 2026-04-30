@@ -45,6 +45,19 @@ const TOOLS = [
       </svg>
     ),
   },
+  {
+    path: '/tools/goal-generator',
+    title: 'Goal Generator',
+    description:
+      'Outcome-orientierte Sprint Goals und PI Objectives formulieren – mit Qualitätsbegründung und Verfeinerungsloop.',
+    icon: (
+      <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+        <circle cx="12" cy="12" r="9" strokeWidth={1.5} />
+        <circle cx="12" cy="12" r="5" strokeWidth={1.5} />
+        <circle cx="12" cy="12" r="1.5" strokeWidth={1.5} />
+      </svg>
+    ),
+  },
 ];
 
 export function ToolSelectionPage() {
