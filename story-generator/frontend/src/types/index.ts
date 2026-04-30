@@ -136,3 +136,7 @@ export type GenerateDocParams =
 // ─── Goal Generator ───────────────────────────────────────────────────────────
 
 export type GoalMode = 'sprint-goal' | 'pi-objective';
+
+export interface SprintGoalInput {
+  idea: string;
+}
