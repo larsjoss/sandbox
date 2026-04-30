@@ -1,9 +1,11 @@
 import type { FormEvent } from 'react';
-import { useState } from 'react';
-import type { GoalMode, SprintGoalInput, PiObjectiveInput, UploadedFile } from '../types';
+import { useEffect, useRef, useState } from 'react';
+import type { GoalMode, GoalVariant, SprintGoalInput, PiObjectiveInput, UploadedFile } from '../types';
+import { useGenerateGoals } from '../hooks/useGoalGenerator';
 import { GoalTabSelector } from '../components/goal-generator/GoalTabSelector';
 import { SprintGoalInputPanel } from '../components/goal-generator/SprintGoalInputPanel';
 import { PiObjectiveInputPanel } from '../components/goal-generator/PiObjectiveInputPanel';
+import { GoalGeneratorOutputPanel } from '../components/goal-generator/GoalGeneratorOutputPanel';
 
 const EMPTY_SPRINT: SprintGoalInput = { idea: '' };
 
@@ -18,9 +20,19 @@ const EMPTY_PI: PiObjectiveInput = {
 
 export function GoalGeneratorPage() {
   const [tab, setTab] = useState<GoalMode>('sprint-goal');
+  const [screen, setScreen] = useState<'input' | 'output'>('input');
   const [sprintInput, setSprintInput] = useState<SprintGoalInput>(EMPTY_SPRINT);
   const [screenshot, setScreenshot] = useState<UploadedFile | null>(null);
   const [piInput, setPiInput] = useState<PiObjectiveInput>(EMPTY_PI);
+  const [variants, setVariants] = useState<GoalVariant[]>([]);
+
+  const outputRef = useRef<HTMLDivElement>(null);
+  const mutation = useGenerateGoals();
+
+  // WCAG 2.4.3: Fokus auf Output-Bereich nach Screen-Transition
+  useEffect(() => {
+    if (screen === 'output') outputRef.current?.focus();
+  }, [screen]);
 
   function hasContent(): boolean {
     if (tab === 'sprint-goal') return !!(sprintInput.idea.trim() || screenshot);
@@ -29,18 +41,68 @@ export function GoalGeneratorPage() {
 
   function handleTabChange(newTab: GoalMode) {
     if (newTab === tab) return;
-    if (hasContent() && !window.confirm('Beim Wechsel des Tabs gehen Eingaben und Output verloren. Fortfahren?')) {
+    const hasAny = hasContent() || screen === 'output';
+    if (hasAny && !window.confirm('Beim Wechsel des Tabs gehen Eingaben und Output verloren. Fortfahren?')) {
       return;
     }
     setTab(newTab);
+    setScreen('input');
     setSprintInput(EMPTY_SPRINT);
     setScreenshot(null);
     setPiInput(EMPTY_PI);
+    setVariants([]);
+    mutation.reset();
   }
 
-  function handleSubmit(e: FormEvent) {
+  async function handleSubmit(e: FormEvent) {
     e.preventDefault();
-    // API-Call folgt in Phase 4
+    try {
+      const result = await mutation.mutateAsync(
+        tab === 'sprint-goal'
+          ? { mode: 'sprint-goal', input: sprintInput, screenshot }
+          : { mode: 'pi-objective', input: piInput },
+      );
+      setVariants(result.variants);
+      setScreen('output');
+    } catch {
+      // Fehler liegt in mutation.error — wird im InputPanel als InlineError angezeigt
+    }
+  }
+
+  async function handleRegenerate() {
+    try {
+      const result = await mutation.mutateAsync(
+        tab === 'sprint-goal'
+          ? { mode: 'sprint-goal', input: sprintInput, screenshot }
+          : { mode: 'pi-objective', input: piInput },
+      );
+      setVariants(result.variants);
+    } catch {
+      // Fehler liegt in mutation.error — wird im OutputPanel als InlineError angezeigt
+    }
+  }
+
+  function handleReset() {
+    if (!window.confirm('Formular und Output zurücksetzen?')) return;
+    setScreen('input');
+    setSprintInput(EMPTY_SPRINT);
+    setScreenshot(null);
+    setPiInput(EMPTY_PI);
+    setVariants([]);
+    mutation.reset();
+  }
+
+  if (screen === 'output') {
+    return (
+      <GoalGeneratorOutputPanel
+        variants={variants}
+        isLoading={mutation.isPending}
+        error={mutation.error}
+        onRegenerate={handleRegenerate}
+        onReset={handleReset}
+        contentRef={outputRef}
+      />
+    );
   }
 
   return (
@@ -53,14 +115,18 @@ export function GoalGeneratorPage() {
           </p>
         </div>
 
-        <GoalTabSelector value={tab} onChange={handleTabChange} />
+        <GoalTabSelector
+          value={tab}
+          onChange={handleTabChange}
+          disabled={mutation.isPending}
+        />
 
         {tab === 'sprint-goal' ? (
           <SprintGoalInputPanel
             input={sprintInput}
             screenshot={screenshot}
-            isLoading={false}
-            error={null}
+            isLoading={mutation.isPending}
+            error={mutation.error}
             onChange={(patch) => setSprintInput((prev) => ({ ...prev, ...patch }))}
             onScreenshotChange={setScreenshot}
             onSubmit={handleSubmit}
@@ -68,8 +134,8 @@ export function GoalGeneratorPage() {
         ) : (
           <PiObjectiveInputPanel
             input={piInput}
-            isLoading={false}
-            error={null}
+            isLoading={mutation.isPending}
+            error={mutation.error}
             onChange={(patch) => setPiInput((prev) => ({ ...prev, ...patch }))}
             onSubmit={handleSubmit}
           />
