@@ -5,6 +5,7 @@ import { ToolSelectionPage } from './pages/ToolSelectionPage';
 import { WorkspacePage } from './pages/WorkspacePage';
 import { TextPolisherPage } from './pages/TextPolisherPage';
 import { TestCaseGeneratorPage } from './pages/TestCaseGeneratorPage';
+import { DocGeneratorPage } from './pages/DocGeneratorPage';
 import { TopNav } from './components/layout/TopNav';
 
 /*
@@ -56,6 +57,7 @@ export default function App() {
           <Route path="/tools/story-generator/:id" element={<WorkspacePage />} />
           <Route path="/tools/text-polisher" element={<TextPolisherPage />} />
           <Route path="/tools/test-case-generator" element={<TestCaseGeneratorPage />} />
+          <Route path="/tools/doc-generator" element={<DocGeneratorPage />} />
         </Route>
 
         {/* Legacy-URLs weiterleiten */}

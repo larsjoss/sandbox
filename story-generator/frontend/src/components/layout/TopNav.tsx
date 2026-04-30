@@ -7,6 +7,7 @@ const TOOLS = [
   { path: '/tools/story-generator', label: 'Story Generator' },
   { path: '/tools/text-polisher', label: 'Text Polisher' },
   { path: '/tools/test-case-generator', label: 'Test Case Generator' },
+  { path: '/tools/doc-generator', label: 'Doc Generator' },
 ];
 
 function KeyIcon() {

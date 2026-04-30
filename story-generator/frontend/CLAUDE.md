@@ -1,6 +1,6 @@
 # AI Tools — Frontend
 
-React 18 + TypeScript + Vite Single-Page-Application. Drei Tools: **Story Generator** (User-Stories aus Anforderungen), **Text Polisher** (Rohtexte aufbereiten) und **Test Case Generator** (Testpläne aus User Stories + Screenshots). Build läuft vollständig im Browser; kein Backend ausser der Anthropic API.
+React 18 + TypeScript + Vite Single-Page-Application. Vier Tools: **Story Generator** (User-Stories aus Anforderungen), **Text Polisher** (Rohtexte aufbereiten), **Test Case Generator** (Testpläne aus User Stories + Screenshots) und **Doc Generator** (fachtechnische Dokumentation für Confluence). Build läuft vollständig im Browser; kein Backend ausser der Anthropic API.
 
 ## Entwicklung
 
@@ -48,6 +48,7 @@ src/
 │   ├── claude.ts               Story Generator API (generate, refineWithHints, refine, formatStoryMarkdown)
 │   ├── textPolisher.ts         Text Polisher API (polishText, 3 System-Prompts)
 │   ├── testCaseGenerator.ts    Test Case Generator API (multimodal, buildJiraMarkdown, buildSingleTcMarkdown)
+│   ├── docGenerator.ts         Doc Generator API (multimodal, buildStoryText, buildFeatureText)
 │   └── storage.ts              localStorage CRUD für Stories + Refinements
 │
 ├── hooks/
@@ -56,14 +57,16 @@ src/
 │   ├── useTextPolisher.ts      usePolishText Mutation
 │   ├── useTestCaseGenerator.ts useGenerateTestCases Mutation
 │   ├── useDebounce.ts          useDebounce (debounced side-effect)
-│   └── useSessionState.ts      sessionStorage-backed useState
+│   ├── useSessionState.ts      sessionStorage-backed useState
+│   └── useDocGenerator.ts      useGenerateDoc Mutation
 │
 ├── pages/
 │   ├── AuthPage.tsx            Login-Seite → /tools
 │   ├── ToolSelectionPage.tsx   Dashboard mit Tool-Cards
 │   ├── WorkspacePage.tsx       Story Generator (3-Panel via AppShell)
 │   ├── TextPolisherPage.tsx    Text Polisher (Split-View, Use-Case-Tabs)
-│   └── TestCaseGeneratorPage.tsx  Test Case Generator (2-Screen: Input → Output)
+│   ├── TestCaseGeneratorPage.tsx  Test Case Generator (2-Screen: Input → Output)
+│   └── DocGeneratorPage.tsx    Doc Generator (2-Screen: Input → Output)
 │
 └── components/
     ├── auth/LoginForm.tsx
@@ -73,9 +76,11 @@ src/
     ├── story/                  StoryInputPanel, StoryOutputPanel, InsightsPanel
     ├── text-polisher/          TextPolisherInputPanel, TextPolisherOutputPanel,
     │                           UseCaseSelector, ToneSelector
-    └── test-case-generator/    TestCaseInputPanel, TestCaseOutputPanel,
-                                TestCaseCard, TestCaseSummaryBlock,
-                                TestCaseFilterBar, constants.ts
+    ├── test-case-generator/    TestCaseInputPanel, TestCaseOutputPanel,
+    │                           TestCaseCard, TestCaseSummaryBlock,
+    │                           TestCaseFilterBar, constants.ts
+    └── doc-generator/          DocGeneratorInputPanel, DocGeneratorOutputPanel,
+                                DocModeSelector
 ```
 
 ## Shared Component Library
@@ -93,7 +98,7 @@ src/
 | `MarkdownOutput` | `children: string` | Beide Output-Panels |
 | `PanelHeader` | `title`, `id?`, `action?` (ReactNode) | Alle 5 Panels |
 | `RevealButton` | `show`, `onToggle`, `label` | LoginForm, SettingsDialog |
-| `ScreenshotUpload` | `files`, `onChange`, `disabled`, `maxFiles` | TestCaseInputPanel, DocGeneratorInputPanel |
+| `ScreenshotUpload` | `files`, `onChange`, `disabled`, `maxFiles` | TestCaseInputPanel, DocGeneratorInputPanel (max 3 Story / max 1 Feature) |
 
 ## Design-Tokens (Tailwind)
 
@@ -155,6 +160,28 @@ Alle Services importieren ausschliesslich `getApiClient()` — kein direkter ses
 **Export:** `buildJiraMarkdown(plan)` (vollständiger Plan), `buildSingleTcMarkdown(tc)` (einzelner TC).
 
 **Filter:** Type-Chips + Level-Segmented-Control (interner State, kein Persist). "Alles kopieren" exportiert immer den ungefilterten Plan.
+
+## Doc Generator
+
+**Modell:** `claude-sonnet-4-5`, `max_tokens: 4000` (Story) / `6000` (Feature)
+
+**Modi:** `story` (Story-Dokumentation) und `feature` (Feature-Dokumentation). Moduswahl via `DocModeSelector` (`role="tablist"`, Arrow-Key-Navigation).
+
+**Multimodal:** Akzeptiert Screenshots als Base64-Image-Content-Blöcke (max. 3 für Story, max. 1 für Feature). Identisches Muster wie Test Case Generator.
+
+**Timeout:** 60 Sekunden via `Promise.race`.
+
+**Output:** Reines Markdown (kein JSON-Parsing). Sektionen des Outputs werden durch optionale Felder gesteuert — leere optionale Felder im Input führen dazu, dass die entsprechenden Sektionen im Output weggelassen werden.
+
+**Pflichtfelder:** Story = Titel + Beschreibung; Feature = Titel + Beschreibung + Enthaltene Stories. Submit-Button ist `disabled` bis Pflichtfelder gefüllt.
+
+**Layout:** 2-Screen State-Machine (`'input' | 'output'`) — konsistent mit TCG. Mode-Wechsel mit `window.confirm()` wenn Eingaben vorhanden.
+
+**Typen:** `DocMode`, `StoryDocInput`, `FeatureDocInput`, `GenerateDocParams` (Discriminated Union) in `src/types/index.ts`.
+
+**Service:** `src/services/docGenerator.ts` — `buildStoryText()`, `buildFeatureText()`, `generateDoc()`.
+
+**Hook:** `src/hooks/useDocGenerator.ts` — `useGenerateDoc()` (TanStack Query `useMutation`).
 
 ## Accessibility (WCAG 2.1 AA)
 
