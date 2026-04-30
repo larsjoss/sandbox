@@ -1,0 +1,19 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "if": "Bash(git commit*)",
+            "command": "result=$(cd /home/user/sandbox/story-generator/frontend && npm test 2>&1 | tail -8); printf '%s' \"$result\" | jq -Rs '{\"systemMessage\": (\"Testergebnisse nach Commit:\\n\" + .)}'",
+            "async": true,
+            "statusMessage": "Tests laufen...",
+            "timeout": 60
+          }
+        ]
+      }
+    ]
+  }
+}
