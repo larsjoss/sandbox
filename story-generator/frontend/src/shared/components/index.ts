@@ -7,3 +7,4 @@ export { SettingsDialog } from './SettingsDialog';
 export { MarkdownOutput } from './MarkdownOutput';
 export { PanelHeader } from './PanelHeader';
 export { RevealButton } from './RevealButton';
+export { ScreenshotUpload } from './ScreenshotUpload';

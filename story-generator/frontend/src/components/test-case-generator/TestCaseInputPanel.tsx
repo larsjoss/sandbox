@@ -1,7 +1,6 @@
 import type { FormEvent } from 'react';
 import type { UploadedFile } from '../../types';
-import { Button, TextArea, InlineError } from '../../shared/components';
-import { ScreenshotUpload } from './ScreenshotUpload';
+import { Button, TextArea, InlineError, ScreenshotUpload } from '../../shared/components';
 
 interface Props {
   storyText: string;

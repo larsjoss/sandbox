@@ -75,7 +75,7 @@ src/
     │                           UseCaseSelector, ToneSelector
     └── test-case-generator/    TestCaseInputPanel, TestCaseOutputPanel,
                                 TestCaseCard, TestCaseSummaryBlock,
-                                TestCaseFilterBar, ScreenshotUpload, constants.ts
+                                TestCaseFilterBar, constants.ts
 ```
 
 ## Shared Component Library
@@ -93,6 +93,7 @@ src/
 | `MarkdownOutput` | `children: string` | Beide Output-Panels |
 | `PanelHeader` | `title`, `id?`, `action?` (ReactNode) | Alle 5 Panels |
 | `RevealButton` | `show`, `onToggle`, `label` | LoginForm, SettingsDialog |
+| `ScreenshotUpload` | `files`, `onChange`, `disabled`, `maxFiles` | TestCaseInputPanel, DocGeneratorInputPanel |
 
 ## Design-Tokens (Tailwind)
 

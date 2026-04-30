@@ -112,11 +112,8 @@ describe('ScreenshotUpload', () => {
     });
 
     it('Drop-Zone ist per Tastatur aktivierbar (Enter/Space)', async () => {
-      const inputClickSpy = vi.fn();
       render(<ScreenshotUpload files={[]} onChange={vi.fn()} />);
       const dropZone = screen.getByRole('button', { name: /screenshot hochladen/i });
-      // input.click wird intern aufgerufen — wir prüfen dass die Drop-Zone
-      // auf Enter reagiert ohne Exception
       await userEvent.type(dropZone, '{Enter}');
       expect(dropZone).toBeInTheDocument();
     });
