@@ -1,10 +1,17 @@
 import type { FormEvent, RefObject } from 'react';
 import { useEffect, useRef } from 'react';
-import type { GoalVariant } from '../../types';
+import type { GoalMode, GoalVariant } from '../../types';
 import { Button, InlineError, LoadingSkeleton, PanelHeader } from '../../shared/components';
 import { GoalVariantCard } from './GoalVariantCard';
 
+const REFINE_PLACEHOLDER: Record<GoalMode, string> = {
+  'sprint-goal': 'z.B. "Mehr Fokus auf Business-Nutzen", "Kürzer", "Weniger technisch"',
+  'pi-objective': 'z.B. "Stärkerer Fokus auf Nutzen für Versicherte", "Outcome-Paragraph prägnanter", "Problemkontext ausbauen"',
+};
+
 interface Props {
+  mode: GoalMode;
+
   // Variants-View
   variants: GoalVariant[];
   isGenerating: boolean;
@@ -28,6 +35,7 @@ interface Props {
 }
 
 export function GoalGeneratorOutputPanel({
+  mode,
   variants,
   isGenerating,
   generateError,
@@ -145,7 +153,7 @@ export function GoalGeneratorOutputPanel({
                   ref={refineInputRef}
                   value={refinementHint}
                   onChange={(e) => onRefinementHintChange(e.target.value)}
-                  placeholder='z.B. "Mehr Fokus auf Business-Nutzen", "Kürzer", "Weniger technisch"'
+                  placeholder={REFINE_PLACEHOLDER[mode]}
                   rows={3}
                   disabled={isRefining}
                   className="w-full rounded-lg border border-edge bg-surface px-3 py-2 text-sm text-ink placeholder:text-ink-tertiary focus:outline-none focus-visible:ring-2 focus-visible:ring-brand resize-none disabled:opacity-50 disabled:cursor-not-allowed"
