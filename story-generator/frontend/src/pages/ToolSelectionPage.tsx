@@ -34,6 +34,17 @@ const TOOLS = [
       </svg>
     ),
   },
+  {
+    path: '/tools/doc-generator',
+    title: 'Doc Generator',
+    description:
+      'Fachtechnische Dokumentation aus User Stories und Features für Confluence generieren.',
+    icon: (
+      <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2zm5-16v4a1 1 0 001 1h4M9 13h6M9 17h4" />
+      </svg>
+    ),
+  },
 ];
 
 export function ToolSelectionPage() {

@@ -105,3 +105,30 @@ export interface UploadedFile {
   previewUrl: string; // URL.createObjectURL — bei Remove/Unmount revoken
   base64: string;     // reines Base64 ohne data-URL-Präfix
 }
+
+// ─── Doc Generator ───────────────────────────────────────────────────────────
+
+export type DocMode = 'story' | 'feature';
+
+export interface StoryDocInput {
+  title: string;
+  description: string;
+  confluenceSpec: string;
+  code: string;
+  acceptedBy: string;
+  deploymentDate: string;
+}
+
+export interface FeatureDocInput {
+  title: string;
+  description: string;
+  stories: string;
+  confluenceSpec: string;
+  code: string;
+  responsible: string;
+  deploymentDate: string;
+}
+
+export type GenerateDocParams =
+  | { mode: 'story'; input: StoryDocInput; screenshots: UploadedFile[] }
+  | { mode: 'feature'; input: FeatureDocInput; screenshots: UploadedFile[] };
