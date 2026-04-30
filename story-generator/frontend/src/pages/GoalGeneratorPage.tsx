@@ -177,25 +177,27 @@ export function GoalGeneratorPage() {
 
   if (screen === 'output') {
     return (
-      <GoalGeneratorOutputPanel
-        mode={tab}
-        variants={variants}
-        isGenerating={generateMutation.isPending}
-        generateError={generateMutation.error}
-        onRegenerate={handleRegenerate}
-        onReset={handleReset}
-        onSelectForRefine={handleSelectForRefine}
-        outputView={outputView}
-        selectedVariant={selectedVariant}
-        refinedVariant={refinedVariant}
-        refinementHint={refinementHint}
-        isRefining={refineMutation.isPending}
-        refineError={refineMutation.error}
-        onRefinementHintChange={setRefinementHint}
-        onRefineSubmit={handleRefineSubmit}
-        onBackToVariants={handleBackToVariants}
-        contentRef={outputRef}
-      />
+      <main id="main-content" className="flex-1 overflow-auto bg-canvas">
+        <GoalGeneratorOutputPanel
+          mode={tab}
+          variants={variants}
+          isGenerating={generateMutation.isPending}
+          generateError={generateMutation.error}
+          onRegenerate={handleRegenerate}
+          onReset={handleReset}
+          onSelectForRefine={handleSelectForRefine}
+          outputView={outputView}
+          selectedVariant={selectedVariant}
+          refinedVariant={refinedVariant}
+          refinementHint={refinementHint}
+          isRefining={refineMutation.isPending}
+          refineError={refineMutation.error}
+          onRefinementHintChange={setRefinementHint}
+          onRefineSubmit={handleRefineSubmit}
+          onBackToVariants={handleBackToVariants}
+          contentRef={outputRef}
+        />
+      </main>
     );
   }
 

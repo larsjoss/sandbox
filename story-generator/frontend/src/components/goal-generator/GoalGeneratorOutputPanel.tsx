@@ -94,6 +94,7 @@ export function GoalGeneratorOutputPanel({
                   key={idx}
                   variant={variant}
                   index={idx}
+                  mode={mode}
                   onRefine={() => onSelectForRefine(variant)}
                 />
               ))}
@@ -138,6 +139,7 @@ export function GoalGeneratorOutputPanel({
               <GoalVariantCard
                 variant={refinedVariant ?? selectedVariant}
                 index={0}
+                mode={mode}
                 label={refinedVariant ? 'Verfeinerte Variante' : 'Ausgewählte Variante'}
               />
             </div>
