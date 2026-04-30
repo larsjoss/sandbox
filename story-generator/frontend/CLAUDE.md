@@ -1,6 +1,26 @@
-# AI Tools — Frontend
+# AI Tools — Frontend (PO Suite)
 
 React 18 + TypeScript + Vite Single-Page-Application. Vier Tools: **Story Generator** (User-Stories aus Anforderungen), **Text Polisher** (Rohtexte aufbereiten), **Test Case Generator** (Testpläne aus User Stories + Screenshots) und **Doc Generator** (fachtechnische Dokumentation für Confluence). Build läuft vollständig im Browser; kein Backend ausser der Anthropic API.
+
+## Aktueller Stand
+
+**Repo:** `larsjoss/sandbox` — **Branch:** `claude/review-project-status-i1G7u`
+
+**Alle vier Module vollständig implementiert und getestet.** 189 Tests grün, Build sauber.
+
+**Offene Aufgaben:**
+- Merge des Feature-Branches in `main` + GitHub Pages Deployment prüfen
+- Zusätzliche Tests: `DocGeneratorOutputPanel`, `docGenerator.ts` Service (buildUserText, Timeout)
+- Evtl. Code-Splitting (Chunk > 500 kB, Vite-Warning)
+
+**Wichtige Konventionen:**
+- Modell überall: `claude-sonnet-4-5`
+- Neues Tool anlegen: Service → Hook → Komponenten → Page → Navigation (App.tsx + TopNav + ToolSelectionPage)
+- State-Machine-Pattern für neue Tools: `'input' | 'output'` wie TCG/DocGenerator
+- Pflichtfeld-Validierung: Submit-Button `disabled`, kein Toast/Alert
+- Fehlerbehandlung: `InlineError` im Formular (Input-Screen) und im Output-Panel (bei Regenerierung)
+- Keine direkten sessionStorage-Zugriffe in Komponenten — nur via `getApiClient()`
+- WCAG 2.1 AA: `focus-visible:ring-2 ring-brand`, `aria-live="polite"` auf `<span>` im Button, `tabIndex={-1}` + `useEffect` für Output-Fokus
 
 ## Entwicklung
 
@@ -175,6 +195,8 @@ Alle Services importieren ausschliesslich `getApiClient()` — kein direkter ses
 
 **Pflichtfelder:** Story = Titel + Beschreibung; Feature = Titel + Beschreibung + Enthaltene Stories. Submit-Button ist `disabled` bis Pflichtfelder gefüllt.
 
+**Fehlerbehandlung:** API-Fehler auf Input-Screen via `InlineError` (unter Submit-Button). Fehler nach "Neu generieren" auf Output-Screen via `error`-Prop in `DocGeneratorOutputPanel` (unter dem "Neu generieren"-Button).
+
 **Layout:** 2-Screen State-Machine (`'input' | 'output'`) — konsistent mit TCG. Mode-Wechsel mit `window.confirm()` wenn Eingaben vorhanden.
 
 **Typen:** `DocMode`, `StoryDocInput`, `FeatureDocInput`, `GenerateDocParams` (Discriminated Union) in `src/types/index.ts`.
@@ -212,6 +234,29 @@ npm run test:coverage # Coverage-Report
 | `useCopyToClipboard.test.ts` | copied-State, Timeout, Clipboard-API |
 | `claude.test.ts` | `parseOutput` — Story/Hints-Trennung |
 | `storage.test.ts` | localStorage CRUD für Stories + Refinements |
+| `ScreenshotUpload.test.tsx` | Upload, Validierung, Remove, ARIA |
+| `TestCaseCard.test.tsx` | Stammdaten, Flags, Copy |
+| `TestCaseFilterBar.test.tsx` | Typ-Filter, Level-Filter, Ergebnis-Zähler |
+| `DocModeSelector.test.tsx` | Tab-Rendering, ARIA, Keyboard-Navigation (ArrowLeft/Right/Home/End) |
+| `DocGeneratorInputPanel.test.tsx` | Pflichtfelder Story/Feature, Ladezustand, Fehleranzeige, Moduswechsel |
+
+**Gesamt: 189 Tests in 14 Test-Dateien** (Stand: Phase 6 + Review-Commit)
+
+## Claude Code Konfiguration
+
+**Hooks** (`.claude/settings.json`):
+
+| Hook | Auslöser | Aktion |
+|---|---|---|
+| `SessionStart` | Sitzungsstart | `session-start.sh` — führt `npm install` aus, wenn `CLAUDE_CODE_REMOTE=true` |
+| `PostToolUse` | Bash-Call mit `git commit*` | Automatischer Test-Run nach Commit; Ergebnis als `systemMessage` |
+
+**Slash Commands** (`.claude/commands/`):
+
+| Command | Zweck |
+|---|---|
+| `/new-component` | Konventionen für neue React-Komponenten (Design-Tokens, ARIA, Imports) |
+| `/new-service` | Konventionen für neue API-Services (`getApiClient()`, Modell, max_tokens, Parsing) |
 
 ## Bekannte Einschränkungen
 

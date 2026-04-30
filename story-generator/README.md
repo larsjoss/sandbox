@@ -1,37 +1,37 @@
-# Story Generator
+# PO Suite
 
-KI-gestütztes Tool für Product Owner: Wandelt rohe Anforderungen (Notizen, Slack-Nachrichten, E-Mails) in entwicklungsreife User Stories um.
+KI-gestützte Tool-Suite für Product Owner — vier Werkzeuge, die den Sprint-Zyklus von der Story-Erstellung bis zur Sprintdokumentation abdecken.
 
 **Live:** [larsjoss.github.io/sandbox](https://larsjoss.github.io/sandbox/)
 
-## Features
+## Tools
 
-- Freitext-Eingabe → strukturierte User Story (Titel, Ausgangslage, Akzeptanzkriterien, Refinement Hinweise)
-- Gezielte Refinement-Anweisungen per Multi-Turn-Conversation mit Verlauf
-- Story-History mit Volltextsuche (localStorage, kein Backend nötig)
-- 4-Panel-Layout: Sidebar | Input | Story | AI Insights
-- Responsive: ARIA-Tablist-Navigation auf Mobile
-- Copy-to-Clipboard
-- WCAG 2.1 AA: Skip-Navigation, ARIA-Landmarks, Fokus-Management, Kontrast ≥ 4.5:1
+| Tool | Route | Beschreibung |
+|---|---|---|
+| **Story Generator** | `/tools/story-generator` | Wandelt Rohnotizen in strukturierte User Stories mit Akzeptanzkriterien und Refinement-Hinweisen um |
+| **Text Polisher** | `/tools/text-polisher` | Bereitet E-Mails, Meeting-Notizen und Freitexte sprachlich und strukturell auf (3 Use Cases) |
+| **Test Case Generator** | `/tools/test-case-generator` | Erstellt strukturierte Testpläne mit AK-Coverage aus User Stories — optional mit UI-Screenshots |
+| **Doc Generator** | `/tools/doc-generator` | Generiert fachtechnische Confluence-Dokumentation für umgesetzte Stories und Features |
 
 ## Architektur
 
 ```
 Browser
-  ├── React 18 + TypeScript + Vite + Tailwind CSS + TanStack Query
-  ├── Anthropic SDK  → claude-sonnet-4-5 (direkt im Browser)
-  └── localStorage   → Stories & Refinements (kein eigenes Backend)
+  ├── React 18 + TypeScript + Vite + Tailwind CSS v3 + TanStack Query v5
+  ├── Anthropic SDK  → claude-sonnet-4-5 (direkt im Browser, dangerouslyAllowBrowser)
+  └── localStorage   → Stories & Refinements  |  sessionStorage → Auth + API-Key
 ```
 
-Die App ist vollständig clientseitig. Der Anthropic API-Key wird
-ausschliesslich in der Browser-Session (`sessionStorage`) gespeichert.
+Vollständig clientseitig. Kein eigenes Backend. Der Anthropic API-Key wird nur in der laufenden Browser-Session (`sessionStorage`) gehalten.
 
 ## Lokale Entwicklung
 
 ```bash
 cd story-generator/frontend
 npm ci
-npm run dev   # http://localhost:5173/sandbox/
+npm run dev        # http://localhost:5173/sandbox/
+npm test           # Vitest (189 Tests)
+npm run build      # TypeScript + Vite Production Build
 ```
 
 Beim ersten Anmelden: Login-Zugangsdaten und Anthropic API-Key (`sk-ant-…`) eingeben.
@@ -48,40 +48,34 @@ main push → npm ci + npm run build → peaceiris/actions-gh-pages
 
 Der Vite base-Pfad `/sandbox/` entspricht dem GitHub-Pages-Pfad des Repositories.
 
-## AI System-Prompt
-
-Festes Template, nicht durch den Nutzer veränderbar. Modell: `claude-sonnet-4-5`.
-
-```
-**Titel** — [kurzer, präziser Titel]
-
-**Ausgangslage**
-[Das Problem in klarer Sprache, 2–4 Sätze]
-
-**Akzeptanzkriterien**
-- AK-1: [testbares, spezifisches Kriterium]
-...
-
-**Weitere Informationen**
-[Links, Kontext, Annahmen]
-
-**Refinement Hinweise**
-[Fehlende Infos und Empfehlungen für das Refinement-Meeting]
-```
-
 ## Projektstruktur
 
 ```
 story-generator/
 ├── frontend/               # React-App (wird deployed)
 │   ├── src/
-│   │   ├── components/     # UI-Komponenten (auth, layout, sidebar, story)
-│   │   ├── context/        # AuthContext (sessionStorage)
-│   │   ├── hooks/          # TanStack Query Hooks
-│   │   ├── pages/          # AuthPage, WorkspacePage
-│   │   ├── services/       # claude.ts (Anthropic API), storage.ts (localStorage)
-│   │   └── types/          # TypeScript-Typen
+│   │   ├── shared/         # Shared Component Library + API-Client
+│   │   ├── components/     # Tool-spezifische Komponenten
+│   │   ├── context/        # AuthContext
+│   │   ├── hooks/          # TanStack Query Mutations pro Tool
+│   │   ├── pages/          # AuthPage, ToolSelectionPage, 4× Tool-Pages
+│   │   ├── services/       # claude.ts, textPolisher.ts, testCaseGenerator.ts,
+│   │   │                   # docGenerator.ts, storage.ts
+│   │   └── types/          # Zentrales types/index.ts
+│   ├── CLAUDE.md           # Detaillierte AI-Entwicklerdokumentation
 │   └── vite.config.ts
 ├── backend/                # Express + Prisma (Referenzimplementierung, nicht deployed)
 └── frontend-static/        # Vanilla-JS-Prototyp (historisch)
+```
+
+## Claude Code Setup
+
+```
+.claude/
+├── settings.json           # Hooks: SessionStart (npm install), PostToolUse (Tests nach Commit)
+├── hooks/
+│   └── session-start.sh    # npm install wenn CLAUDE_CODE_REMOTE=true
+└── commands/
+    ├── new-component.md    # /new-component Slash-Command
+    └── new-service.md      # /new-service Slash-Command
 ```
