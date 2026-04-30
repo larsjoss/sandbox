@@ -1,13 +1,19 @@
+import type { FormEvent } from 'react';
 import { useState } from 'react';
-import type { GoalMode } from '../types';
+import type { GoalMode, SprintGoalInput, UploadedFile } from '../types';
 import { GoalTabSelector } from '../components/goal-generator/GoalTabSelector';
+import { SprintGoalInputPanel } from '../components/goal-generator/SprintGoalInputPanel';
+
+const EMPTY_SPRINT: SprintGoalInput = { idea: '' };
 
 export function GoalGeneratorPage() {
   const [tab, setTab] = useState<GoalMode>('sprint-goal');
+  const [sprintInput, setSprintInput] = useState<SprintGoalInput>(EMPTY_SPRINT);
+  const [screenshot, setScreenshot] = useState<UploadedFile | null>(null);
 
-  // Wird in späteren Phasen auf echten Input/Output-State verdrahtet
   function hasContent(): boolean {
-    return false;
+    if (tab === 'sprint-goal') return !!(sprintInput.idea.trim() || screenshot);
+    return false; // PI Objective folgt in Phase 3
   }
 
   function handleTabChange(newTab: GoalMode) {
@@ -16,6 +22,13 @@ export function GoalGeneratorPage() {
       return;
     }
     setTab(newTab);
+    setSprintInput(EMPTY_SPRINT);
+    setScreenshot(null);
+  }
+
+  function handleSubmit(e: FormEvent) {
+    e.preventDefault();
+    // API-Call folgt in Phase 4
   }
 
   return (
@@ -31,16 +44,15 @@ export function GoalGeneratorPage() {
         <GoalTabSelector value={tab} onChange={handleTabChange} />
 
         {tab === 'sprint-goal' ? (
-          <div
-            id="gg-panel-sprint-goal"
-            role="tabpanel"
-            aria-labelledby="gg-tab-sprint-goal"
-          >
-            <Placeholder
-              title="Sprint Goal"
-              description="Formuliere outcome-orientierte Sprint Goals basierend auf deiner Idee und optionalem Backlog-Screenshot."
-            />
-          </div>
+          <SprintGoalInputPanel
+            input={sprintInput}
+            screenshot={screenshot}
+            isLoading={false}
+            error={null}
+            onChange={(patch) => setSprintInput((prev) => ({ ...prev, ...patch }))}
+            onScreenshotChange={setScreenshot}
+            onSubmit={handleSubmit}
+          />
         ) : (
           <div
             id="gg-panel-pi-objective"
