@@ -162,5 +162,21 @@ export type GenerateGoalParams =
 
 export interface GenerateGoalResult {
   variants: GoalVariant[];
-  rawText: string;  // Rohtext für spätere Refinement-Conversation-History
+  rawText: string;
+}
+
+export interface RefineSprintGoalParams {
+  input: SprintGoalInput;
+  screenshot: UploadedFile | null;
+  rawInitialResponse: string;
+  selectedVariantText: string;
+  refinementHint: string;
+  // Jede Iteration speichert die gesendete User-Message + den rohen Assistant-Response
+  previousRefinements: Array<{ userMessage: string; rawResult: string }>;
+}
+
+export interface RefineGoalResult {
+  variant: GoalVariant;
+  rawText: string;
+  userMessage: string;  // gesendete User-Message — wird in previousRefinements gespeichert
 }
