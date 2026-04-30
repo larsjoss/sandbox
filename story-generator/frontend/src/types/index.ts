@@ -149,3 +149,18 @@ export interface PiObjectiveInput {
   acceptanceDate: string;
   acceptanceLevel: string;
 }
+
+export interface GoalVariant {
+  text: string;       // Nur der Goal-Text — wird per Kopieren-Button kopiert
+  rationale: string;  // Qualitätsbegründung
+  weakness?: string;  // Optionale Schwachstelle
+}
+
+export type GenerateGoalParams =
+  | { mode: 'sprint-goal'; input: SprintGoalInput; screenshot: UploadedFile | null }
+  | { mode: 'pi-objective'; input: PiObjectiveInput };
+
+export interface GenerateGoalResult {
+  variants: GoalVariant[];
+  rawText: string;  // Rohtext für spätere Refinement-Conversation-History
+}
