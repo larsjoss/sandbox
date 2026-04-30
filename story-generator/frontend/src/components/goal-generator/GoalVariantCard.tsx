@@ -1,25 +1,22 @@
-import type { GoalVariant } from '../../types';
+import type { GoalMode, GoalVariant } from '../../types';
 import { CopyButton, MarkdownOutput } from '../../shared/components';
 
 interface Props {
   variant: GoalVariant;
   index: number;
+  mode: GoalMode;
   // Wenn gesetzt, wird "Verfeinern →"-Button angezeigt
   onRefine?: () => void;
   // Überschreibt "Variante N" im Badge (z.B. für Refinement-View)
   label?: string;
-  isSelected?: boolean;
 }
 
-export function GoalVariantCard({ variant, index, onRefine, label, isSelected }: Props) {
+export function GoalVariantCard({ variant, index, mode, onRefine, label }: Props) {
   const badgeText = label ?? `Variante ${index + 1}`;
 
   return (
     <article
-      className={[
-        'bg-surface border rounded-xl p-5 space-y-3 transition-colors',
-        isSelected ? 'border-brand ring-2 ring-brand ring-offset-1' : 'border-edge',
-      ].join(' ')}
+      className="bg-surface border border-edge rounded-xl p-5 space-y-3 transition-colors"
       aria-label={badgeText}
     >
       {/* Header: Badge + Kopieren-Button */}
@@ -30,10 +27,12 @@ export function GoalVariantCard({ variant, index, onRefine, label, isSelected }:
         <CopyButton text={variant.text} label={badgeText} />
       </div>
 
-      {/* Goal Text — Markdown for PI Objective, plain paragraph sufficient for Sprint Goal */}
-      <div className="text-sm text-ink leading-relaxed">
+      {/* Goal Text — Markdown for PI Objective (rich structure), plain <p> for Sprint Goal */}
+      {mode === 'pi-objective' ? (
         <MarkdownOutput>{variant.text}</MarkdownOutput>
-      </div>
+      ) : (
+        <p className="text-sm text-ink leading-relaxed">{variant.text}</p>
+      )}
 
       {/* Qualitätsbegründung */}
       {variant.rationale && (
