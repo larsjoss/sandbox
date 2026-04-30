@@ -1,5 +1,5 @@
 import type { GoalVariant } from '../../types';
-import { CopyButton } from '../../shared/components';
+import { CopyButton, MarkdownOutput } from '../../shared/components';
 
 interface Props {
   variant: GoalVariant;
@@ -30,8 +30,10 @@ export function GoalVariantCard({ variant, index, onRefine, label, isSelected }:
         <CopyButton text={variant.text} label={badgeText} />
       </div>
 
-      {/* Sprint Goal Text */}
-      <p className="text-sm text-ink leading-relaxed">{variant.text}</p>
+      {/* Goal Text — Markdown for PI Objective, plain paragraph sufficient for Sprint Goal */}
+      <div className="text-sm text-ink leading-relaxed">
+        <MarkdownOutput>{variant.text}</MarkdownOutput>
+      </div>
 
       {/* Qualitätsbegründung */}
       {variant.rationale && (

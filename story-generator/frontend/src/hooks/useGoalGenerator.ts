@@ -3,7 +3,7 @@ import { generateGoals, refineGoal } from '../services/goalGenerator';
 import type {
   GenerateGoalParams,
   GenerateGoalResult,
-  RefineSprintGoalParams,
+  RefineGoalParams,
   RefineGoalResult,
 } from '../types';
 
@@ -14,7 +14,7 @@ export function useGenerateGoals() {
 }
 
 export function useRefineGoal() {
-  return useMutation<RefineGoalResult, Error, RefineSprintGoalParams>({
+  return useMutation<RefineGoalResult, Error, RefineGoalParams>({
     mutationFn: refineGoal,
   });
 }

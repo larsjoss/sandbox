@@ -165,15 +165,16 @@ export interface GenerateGoalResult {
   rawText: string;
 }
 
-export interface RefineSprintGoalParams {
-  input: SprintGoalInput;
-  screenshot: UploadedFile | null;
+interface RefineGoalParamsBase {
   rawInitialResponse: string;
   selectedVariantText: string;
   refinementHint: string;
-  // Jede Iteration speichert die gesendete User-Message + den rohen Assistant-Response
   previousRefinements: Array<{ userMessage: string; rawResult: string }>;
 }
+
+export type RefineGoalParams =
+  | (RefineGoalParamsBase & { mode: 'sprint-goal'; input: SprintGoalInput; screenshot: UploadedFile | null })
+  | (RefineGoalParamsBase & { mode: 'pi-objective'; input: PiObjectiveInput });
 
 export interface RefineGoalResult {
   variant: GoalVariant;
