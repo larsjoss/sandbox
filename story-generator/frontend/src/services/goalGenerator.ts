@@ -1,6 +1,13 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { getApiClient, extractTextContent } from '../shared/services/apiClient';
-import type { GoalVariant, GenerateGoalParams, GenerateGoalResult, SprintGoalInput } from '../types';
+import type {
+  GoalVariant,
+  GenerateGoalParams,
+  GenerateGoalResult,
+  RefineSprintGoalParams,
+  RefineGoalResult,
+  SprintGoalInput,
+} from '../types';
 
 // ─── System Prompts ───────────────────────────────────────────────────────────
 
@@ -33,6 +40,11 @@ export function parseVariants(raw: string): GoalVariant[] {
   return blocks.map(parseVariantBlock).filter((v) => v.text.length > 0);
 }
 
+// Für Refinement-Responses ohne "Variante N" Header
+export function parseRefinedVariant(raw: string): GoalVariant {
+  return parseVariantBlock(raw.trim());
+}
+
 function parseVariantBlock(block: string): GoalVariant {
   // Optionalen --- Trenner am Anfang entfernen
   const cleaned = block.replace(/^---\s*\n?/, '').trim();
@@ -63,6 +75,16 @@ function parseVariantBlock(block: string): GoalVariant {
 
 function buildSprintGoalUserText(input: SprintGoalInput): string {
   return `Sprint Goal Idee:\n${input.idea}`;
+}
+
+function buildRefinementInstruction(selectedVariantText: string, hint: string): string {
+  return (
+    `Bitte verfeinere die folgende Variante basierend auf diesem Hinweis: "${hint}"\n\n` +
+    `Ausgewählte Variante:\n${selectedVariantText}\n\n` +
+    `Liefere eine einzelne überarbeitete Variante in der gleichen Struktur ` +
+    `(Sprint Goal Text, dann Qualitätsbegründung, optional Schwachstelle). ` +
+    `Kein "Variante N" Header.`
+  );
 }
 
 // ─── API-Call ─────────────────────────────────────────────────────────────────
@@ -111,4 +133,58 @@ export async function generateGoals(params: GenerateGoalParams): Promise<Generat
 
   const variants = parseVariants(rawText);
   return { variants, rawText };
+}
+
+export async function refineGoal(params: RefineSprintGoalParams): Promise<RefineGoalResult> {
+  const client = getApiClient();
+
+  // Original-Input als erster User-Turn (identisch zu generateGoals)
+  const userText = buildSprintGoalUserText(params.input);
+  const originalContentBlocks: Anthropic.Messages.ContentBlockParam[] = [
+    { type: 'text', text: userText },
+  ];
+  if (params.screenshot) {
+    const mediaType = params.screenshot.file.type as 'image/png' | 'image/jpeg' | 'image/webp';
+    originalContentBlocks.push({
+      type: 'image',
+      source: { type: 'base64', media_type: mediaType, data: params.screenshot.base64 },
+    });
+  }
+
+  // Aktuelle Verfeinerungsinstruktion
+  const userMessage = buildRefinementInstruction(params.selectedVariantText, params.refinementHint);
+
+  // Conversation-History aufbauen — wie refineStory() im Story Generator
+  const messages: Anthropic.Messages.MessageParam[] = [
+    { role: 'user', content: originalContentBlocks },
+    { role: 'assistant', content: params.rawInitialResponse },
+    ...params.previousRefinements.flatMap((r) => [
+      { role: 'user' as const, content: r.userMessage },
+      { role: 'assistant' as const, content: r.rawResult },
+    ]),
+    { role: 'user', content: userMessage },
+  ];
+
+  const timeoutPromise = new Promise<never>((_, reject) =>
+    setTimeout(
+      () => reject(new Error('Zeitüberschreitung nach 60 Sekunden. Bitte erneut versuchen.')),
+      60_000,
+    ),
+  );
+
+  const apiCall = client.messages.create({
+    model: 'claude-sonnet-4-5',
+    max_tokens: 1000,
+    system: SPRINT_GOAL_SYSTEM_PROMPT,
+    messages,
+  });
+
+  const response = await Promise.race([apiCall, timeoutPromise]);
+  const rawText = extractTextContent(response.content);
+
+  if (!rawText.trim()) {
+    throw new Error('Die Verfeinerung konnte nicht generiert werden. Bitte erneut versuchen.');
+  }
+
+  return { variant: parseRefinedVariant(rawText), rawText, userMessage };
 }
