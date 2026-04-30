@@ -117,6 +117,7 @@ export function DocGeneratorPage() {
         <DocGeneratorOutputPanel
           markdown={mutation.data}
           isLoading={mutation.isPending}
+          error={mutation.error}
           onRegenerate={handleRegenerate}
           onReset={handleReset}
           contentRef={outputRef}

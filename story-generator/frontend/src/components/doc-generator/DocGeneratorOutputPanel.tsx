@@ -1,10 +1,11 @@
 import type { RefObject } from 'react';
-import { Button, LoadingSkeleton, MarkdownOutput, PanelHeader } from '../../shared/components';
+import { Button, InlineError, LoadingSkeleton, MarkdownOutput, PanelHeader } from '../../shared/components';
 import { useCopyToClipboard } from '../../hooks/useCopyToClipboard';
 
 interface Props {
   markdown: string;
   isLoading: boolean;
+  error?: Error | null;
   onRegenerate: () => void;
   onReset: () => void;
   contentRef: RefObject<HTMLDivElement>;
@@ -13,6 +14,7 @@ interface Props {
 export function DocGeneratorOutputPanel({
   markdown,
   isLoading,
+  error,
   onRegenerate,
   onReset,
   contentRef,
@@ -77,6 +79,10 @@ export function DocGeneratorOutputPanel({
               >
                 Neu generieren
               </Button>
+
+              {error && (
+                <InlineError message={error.message} />
+              )}
 
               <Button
                 onClick={onReset}
