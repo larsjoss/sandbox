@@ -58,7 +58,7 @@ export function GoalGeneratorOutputPanel({
     <div
       className="max-w-3xl mx-auto px-6 py-8"
       role="region"
-      aria-label="Generierte Sprint Goal Varianten"
+      aria-label="Generierte Varianten"
     >
       <div
         ref={contentRef}

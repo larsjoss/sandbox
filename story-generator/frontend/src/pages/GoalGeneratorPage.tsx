@@ -157,14 +157,11 @@ export function GoalGeneratorPage() {
     const variantToRefine = refinedVariant ?? selectedVariant;
 
     try {
-      const result = await refineMutation.mutateAsync({
-        input: sprintInput,
-        screenshot,
-        rawInitialResponse,
-        selectedVariantText: variantToRefine.text,
-        refinementHint,
-        previousRefinements: refinementHistory,
-      });
+      const result = await refineMutation.mutateAsync(
+        tab === 'sprint-goal'
+          ? { mode: 'sprint-goal', input: sprintInput, screenshot, rawInitialResponse, selectedVariantText: variantToRefine.text, refinementHint, previousRefinements: refinementHistory }
+          : { mode: 'pi-objective', input: piInput, rawInitialResponse, selectedVariantText: variantToRefine.text, refinementHint, previousRefinements: refinementHistory },
+      );
       setRefinementHistory((prev) => [
         ...prev,
         { userMessage: result.userMessage, rawResult: result.rawText },

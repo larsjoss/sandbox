@@ -4,9 +4,10 @@ import type {
   GoalVariant,
   GenerateGoalParams,
   GenerateGoalResult,
-  RefineSprintGoalParams,
+  RefineGoalParams,
   RefineGoalResult,
   SprintGoalInput,
+  PiObjectiveInput,
 } from '../types';
 
 // ─── System Prompts ───────────────────────────────────────────────────────────
@@ -26,6 +27,36 @@ Wenn ein Screenshot des Sprint Backlogs vorhanden ist, berücksichtige die sicht
 
 Formatiere den Output klar strukturiert mit Variante 1, Variante 2, Variante 3.`;
 
+const PI_OBJECTIVE_SYSTEM_PROMPT = `Du bist ein erfahrener Product Owner und Business Analyst in einem Schweizer Versicherungsunternehmen, das im SAFe-Framework arbeitet. Du hilfst dabei, PI Objectives strukturiert und outcome-orientiert zu formulieren.
+
+Erstelle basierend auf dem folgenden ART-Feature Input 2–3 Varianten eines PI Objectives auf Deutsch. Die Varianten sollen sich vor allem im Outcome-Paragraph bedeutsam unterscheiden – in Perspektive, Betonung oder Schärfe der Wirkungsbeschreibung.
+
+Jede Variante folgt exakt dieser Struktur:
+
+**[ART-Feature Titel]**
+[Jira-Referenz falls vorhanden] - [ART-Feature Titel]
+
+[Problemkontext / Ist-Zustand: 3–5 Sätze. Beschreibt das heutige Problem, die Ineffizienz oder die Lücke, die dieses Feature adressiert.]
+
+* [Konkreter Liefergegenstand 1]
+* [Konkreter Liefergegenstand 2]
+* [Konkreter Liefergegenstand 3]
+* [...]
+
+[Outcome-Paragraph: 3–5 Sätze. Beschreibt den Nutzen für Anwender und Business nach Umsetzung. Outcome-orientiert formuliert – nicht was gebaut wurde, sondern was dadurch möglich wird oder sich verbessert.]
+
+[Abnahme-Sektion nur wenn Abnahme-Informationen vorhanden: "Abnahme auf der Stufe [Stufe] per [Datum] durch [Personen]."]
+
+---
+
+Nach jeder Variante lieferst du:
+Qualitätsbegründung: Was macht den Outcome-Paragraph dieser Variante stark? (1–2 Sätze)
+Schwachstelle: Wo könnte er noch schärfer sein? (1 Satz, nur wenn relevant)
+
+Erfinde keine Inhalte, die nicht aus dem Input ableitbar sind. Die Bullet Points der Liefergegenstände sollen aus dem Feature-Input abgeleitet werden – nicht erfunden oder generalisiert.
+
+Formatiere den Output klar strukturiert mit Variante 1, Variante 2, Variante 3.`;
+
 // ─── Output-Parser ────────────────────────────────────────────────────────────
 
 export function parseVariants(raw: string): GoalVariant[] {
@@ -40,32 +71,39 @@ export function parseVariants(raw: string): GoalVariant[] {
   return blocks.map(parseVariantBlock).filter((v) => v.text.length > 0);
 }
 
-// Für Refinement-Responses ohne "Variante N" Header
+// Auch als Export für Refinement-Responses ohne "Variante N" Header
 export function parseRefinedVariant(raw: string): GoalVariant {
   return parseVariantBlock(raw.trim());
 }
 
 function parseVariantBlock(block: string): GoalVariant {
-  // Optionalen --- Trenner am Anfang entfernen
-  const cleaned = block.replace(/^---\s*\n?/, '').trim();
+  const cleaned = block.trim();
 
-  // Trennstelle "Qualitätsbegründung:" finden
-  const qIdx = cleaned.search(/\nQualitätsbegründung:/i);
-  if (qIdx === -1) return { text: cleaned, rationale: '' };
+  // Trennstelle suchen: optional vorangestelltes "---" vor "Qualitätsbegründung:"
+  // Abdeckt Sprint Goal (kein ---) und PI Objective (--- als Trenner)
+  const qIdx = cleaned.search(/\n(?:---\s*\n)?Qualitätsbegründung:/i);
+  if (qIdx === -1) {
+    // Kein Separator gefunden — trailing --- entfernen (PI Objective ohne Qualitätsbegründung)
+    return { text: cleaned.replace(/\n\s*---\s*$/, '').trim(), rationale: '' };
+  }
 
-  const text = cleaned.slice(0, qIdx).trim();
-  // "+1" überspringt das führende \n vor "Qualitätsbegründung:"
-  const afterQ = cleaned.slice(qIdx + 1);
+  // Text = alles vor dem Separator, trailing --- entfernen
+  const text = cleaned.slice(0, qIdx).replace(/\n\s*---\s*$/, '').trim();
+
+  // Rest: optionalen --- Trenner und "Qualitätsbegründung:" Label abstreifen
+  const afterQ = cleaned
+    .slice(qIdx + 1)           // '+1' überspringt das führende \n
+    .replace(/^---\s*\n/, '')  // optionalen --- Trenner entfernen
+    .replace(/^Qualitätsbegründung:\s*/i, '')
+    .trim();
 
   // Trennstelle "Schwachstelle:" finden
   const sIdx = afterQ.search(/\nSchwachstelle:/i);
-
   if (sIdx === -1) {
-    const rationale = afterQ.replace(/^Qualitätsbegründung:\s*/i, '').trim();
-    return { text, rationale };
+    return { text, rationale: afterQ };
   }
 
-  const rationale = afterQ.slice(0, sIdx).replace(/^Qualitätsbegründung:\s*/i, '').trim();
+  const rationale = afterQ.slice(0, sIdx).trim();
   const weakness = afterQ.slice(sIdx + 1).replace(/^Schwachstelle:\s*/i, '').trim() || undefined;
 
   return { text, rationale, weakness };
@@ -77,38 +115,70 @@ function buildSprintGoalUserText(input: SprintGoalInput): string {
   return `Sprint Goal Idee:\n${input.idea}`;
 }
 
+function buildPiObjectiveUserText(input: PiObjectiveInput): string {
+  const lines: string[] = [];
+  lines.push(`**ART-Feature Titel:** ${input.featureTitle}`);
+  lines.push('');
+  lines.push(`**ART-Feature Beschreibung:**\n${input.featureDescription}`);
+  if (input.jiraReference.trim()) {
+    lines.push('');
+    lines.push(`**Jira-Referenz:** ${input.jiraReference.trim()}`);
+  }
+  if (input.acceptedBy.trim()) {
+    lines.push('');
+    lines.push(`**Abnahme durch:** ${input.acceptedBy.trim()}`);
+  }
+  if (input.acceptanceDate.trim()) {
+    lines.push('');
+    lines.push(`**Abnahme-Datum:** ${input.acceptanceDate.trim()}`);
+  }
+  if (input.acceptanceLevel.trim()) {
+    lines.push('');
+    lines.push(`**Abnahme-Stufe:** ${input.acceptanceLevel.trim()}`);
+  }
+  return lines.join('\n');
+}
+
 function buildRefinementInstruction(selectedVariantText: string, hint: string): string {
   return (
     `Bitte verfeinere die folgende Variante basierend auf diesem Hinweis: "${hint}"\n\n` +
     `Ausgewählte Variante:\n${selectedVariantText}\n\n` +
-    `Liefere eine einzelne überarbeitete Variante in der gleichen Struktur ` +
-    `(Sprint Goal Text, dann Qualitätsbegründung, optional Schwachstelle). ` +
+    `Liefere eine einzelne überarbeitete Variante in der gleichen Struktur. ` +
     `Kein "Variante N" Header.`
   );
 }
 
-// ─── API-Call ─────────────────────────────────────────────────────────────────
+// ─── Hilfsfunktion: ContentBlocks für einen User-Turn ────────────────────────
 
-export async function generateGoals(params: GenerateGoalParams): Promise<GenerateGoalResult> {
-  if (params.mode === 'pi-objective') {
-    // PI Objective folgt in Phase 5
-    throw new Error('PI Objective wird in Kürze verfügbar sein.');
-  }
+function buildOriginalContentBlocks(
+  params: GenerateGoalParams | RefineGoalParams,
+): Anthropic.Messages.ContentBlockParam[] {
+  const userText =
+    params.mode === 'sprint-goal'
+      ? buildSprintGoalUserText(params.input)
+      : buildPiObjectiveUserText(params.input);
 
-  const client = getApiClient();
+  const blocks: Anthropic.Messages.ContentBlockParam[] = [{ type: 'text', text: userText }];
 
-  const userText = buildSprintGoalUserText(params.input);
-  const contentBlocks: Anthropic.Messages.ContentBlockParam[] = [
-    { type: 'text', text: userText },
-  ];
-
-  if (params.screenshot) {
+  if (params.mode === 'sprint-goal' && params.screenshot) {
     const mediaType = params.screenshot.file.type as 'image/png' | 'image/jpeg' | 'image/webp';
-    contentBlocks.push({
+    blocks.push({
       type: 'image',
       source: { type: 'base64', media_type: mediaType, data: params.screenshot.base64 },
     });
   }
+
+  return blocks;
+}
+
+// ─── API-Calls ────────────────────────────────────────────────────────────────
+
+export async function generateGoals(params: GenerateGoalParams): Promise<GenerateGoalResult> {
+  const client = getApiClient();
+
+  const systemPrompt =
+    params.mode === 'sprint-goal' ? SPRINT_GOAL_SYSTEM_PROMPT : PI_OBJECTIVE_SYSTEM_PROMPT;
+  const maxTokens = params.mode === 'sprint-goal' ? 2000 : 6000;
 
   const timeoutPromise = new Promise<never>((_, reject) =>
     setTimeout(
@@ -119,9 +189,9 @@ export async function generateGoals(params: GenerateGoalParams): Promise<Generat
 
   const apiCall = client.messages.create({
     model: 'claude-sonnet-4-5',
-    max_tokens: 2000,
-    system: SPRINT_GOAL_SYSTEM_PROMPT,
-    messages: [{ role: 'user', content: contentBlocks }],
+    max_tokens: maxTokens,
+    system: systemPrompt,
+    messages: [{ role: 'user', content: buildOriginalContentBlocks(params) }],
   });
 
   const response = await Promise.race([apiCall, timeoutPromise]);
@@ -131,32 +201,21 @@ export async function generateGoals(params: GenerateGoalParams): Promise<Generat
     throw new Error('Es konnten keine Varianten generiert werden. Bitte erneut versuchen.');
   }
 
-  const variants = parseVariants(rawText);
-  return { variants, rawText };
+  return { variants: parseVariants(rawText), rawText };
 }
 
-export async function refineGoal(params: RefineSprintGoalParams): Promise<RefineGoalResult> {
+export async function refineGoal(params: RefineGoalParams): Promise<RefineGoalResult> {
   const client = getApiClient();
 
-  // Original-Input als erster User-Turn (identisch zu generateGoals)
-  const userText = buildSprintGoalUserText(params.input);
-  const originalContentBlocks: Anthropic.Messages.ContentBlockParam[] = [
-    { type: 'text', text: userText },
-  ];
-  if (params.screenshot) {
-    const mediaType = params.screenshot.file.type as 'image/png' | 'image/jpeg' | 'image/webp';
-    originalContentBlocks.push({
-      type: 'image',
-      source: { type: 'base64', media_type: mediaType, data: params.screenshot.base64 },
-    });
-  }
+  const systemPrompt =
+    params.mode === 'sprint-goal' ? SPRINT_GOAL_SYSTEM_PROMPT : PI_OBJECTIVE_SYSTEM_PROMPT;
+  const maxTokens = params.mode === 'sprint-goal' ? 1000 : 2000;
 
-  // Aktuelle Verfeinerungsinstruktion
   const userMessage = buildRefinementInstruction(params.selectedVariantText, params.refinementHint);
 
-  // Conversation-History aufbauen — wie refineStory() im Story Generator
+  // Conversation-History aufbauen — identisches Pattern wie refineStory() im Story Generator
   const messages: Anthropic.Messages.MessageParam[] = [
-    { role: 'user', content: originalContentBlocks },
+    { role: 'user', content: buildOriginalContentBlocks(params) },
     { role: 'assistant', content: params.rawInitialResponse },
     ...params.previousRefinements.flatMap((r) => [
       { role: 'user' as const, content: r.userMessage },
@@ -174,8 +233,8 @@ export async function refineGoal(params: RefineSprintGoalParams): Promise<Refine
 
   const apiCall = client.messages.create({
     model: 'claude-sonnet-4-5',
-    max_tokens: 1000,
-    system: SPRINT_GOAL_SYSTEM_PROMPT,
+    max_tokens: maxTokens,
+    system: systemPrompt,
     messages,
   });
 
