@@ -140,3 +140,12 @@ export type GoalMode = 'sprint-goal' | 'pi-objective';
 export interface SprintGoalInput {
   idea: string;
 }
+
+export interface PiObjectiveInput {
+  featureTitle: string;
+  featureDescription: string;
+  jiraReference: string;
+  acceptedBy: string;
+  acceptanceDate: string;
+  acceptanceLevel: string;
+}

@@ -1,19 +1,30 @@
 import type { FormEvent } from 'react';
 import { useState } from 'react';
-import type { GoalMode, SprintGoalInput, UploadedFile } from '../types';
+import type { GoalMode, SprintGoalInput, PiObjectiveInput, UploadedFile } from '../types';
 import { GoalTabSelector } from '../components/goal-generator/GoalTabSelector';
 import { SprintGoalInputPanel } from '../components/goal-generator/SprintGoalInputPanel';
+import { PiObjectiveInputPanel } from '../components/goal-generator/PiObjectiveInputPanel';
 
 const EMPTY_SPRINT: SprintGoalInput = { idea: '' };
+
+const EMPTY_PI: PiObjectiveInput = {
+  featureTitle: '',
+  featureDescription: '',
+  jiraReference: '',
+  acceptedBy: '',
+  acceptanceDate: '',
+  acceptanceLevel: '',
+};
 
 export function GoalGeneratorPage() {
   const [tab, setTab] = useState<GoalMode>('sprint-goal');
   const [sprintInput, setSprintInput] = useState<SprintGoalInput>(EMPTY_SPRINT);
   const [screenshot, setScreenshot] = useState<UploadedFile | null>(null);
+  const [piInput, setPiInput] = useState<PiObjectiveInput>(EMPTY_PI);
 
   function hasContent(): boolean {
     if (tab === 'sprint-goal') return !!(sprintInput.idea.trim() || screenshot);
-    return false; // PI Objective folgt in Phase 3
+    return !!(piInput.featureTitle.trim() || piInput.featureDescription.trim());
   }
 
   function handleTabChange(newTab: GoalMode) {
@@ -24,6 +35,7 @@ export function GoalGeneratorPage() {
     setTab(newTab);
     setSprintInput(EMPTY_SPRINT);
     setScreenshot(null);
+    setPiInput(EMPTY_PI);
   }
 
   function handleSubmit(e: FormEvent) {
@@ -54,27 +66,15 @@ export function GoalGeneratorPage() {
             onSubmit={handleSubmit}
           />
         ) : (
-          <div
-            id="gg-panel-pi-objective"
-            role="tabpanel"
-            aria-labelledby="gg-tab-pi-objective"
-          >
-            <Placeholder
-              title="PI Objective"
-              description="Generiere strukturierte PI Objectives aus ART-Feature Titel, Beschreibung und optionalen Abnahme-Informationen."
-            />
-          </div>
+          <PiObjectiveInputPanel
+            input={piInput}
+            isLoading={false}
+            error={null}
+            onChange={(patch) => setPiInput((prev) => ({ ...prev, ...patch }))}
+            onSubmit={handleSubmit}
+          />
         )}
       </div>
     </main>
-  );
-}
-
-function Placeholder({ title, description }: { title: string; description: string }) {
-  return (
-    <div className="rounded-xl border-2 border-dashed border-edge bg-surface px-8 py-12 text-center">
-      <p className="font-serif text-base font-semibold text-ink mb-2">{title}</p>
-      <p className="text-sm text-ink-tertiary max-w-sm mx-auto">{description}</p>
-    </div>
   );
 }
