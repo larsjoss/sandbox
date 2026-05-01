@@ -1,15 +1,8 @@
-import { useState } from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
+import { useEffect, useRef, useState } from 'react';
+import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { SettingsDialog } from '../../shared/components/SettingsDialog';
-
-const TOOLS = [
-  { path: '/tools/story-generator', label: 'Story Generator' },
-  { path: '/tools/text-polisher', label: 'Text Polisher' },
-  { path: '/tools/test-case-generator', label: 'Test Case Generator' },
-  { path: '/tools/doc-generator', label: 'Doc Generator' },
-  { path: '/tools/goal-generator', label: 'Goal Generator' },
-];
+import { TOOLS } from '../../constants/tools';
 
 function KeyIcon() {
   return (
@@ -30,7 +23,22 @@ function LogoutIcon() {
 export function TopNav() {
   const { logout, apiKey } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const navRef = useRef<HTMLElement>(null);
+
+  const activeTool = TOOLS.find((t) => location.pathname.startsWith(t.path));
+
+  // Scroll active tab into center of the nav strip (mobile)
+  useEffect(() => {
+    const nav = navRef.current;
+    if (!nav) return;
+    const active = nav.querySelector<HTMLElement>('[aria-current="page"]');
+    if (!active) return;
+    const navRect = nav.getBoundingClientRect();
+    const activeRect = active.getBoundingClientRect();
+    nav.scrollLeft += activeRect.left - navRect.left - (navRect.width - activeRect.width) / 2;
+  }, [activeTool?.id]);
 
   const handleLogout = async () => {
     await logout();
@@ -40,74 +48,98 @@ export function TopNav() {
   return (
     <>
       {/*
-       * WCAG 4.1.2 / 1.3.6 – <header> als Banner-Landmark mit aria-label,
-       * damit Screen Reader die Navigation von anderen Regionen unterscheiden kann.
+       * WCAG 4.1.2 / 1.3.6 — <header> als Banner-Landmark.
+       * sticky top-0 stellt sicher, dass Wayfinding beim Scrollen sichtbar bleibt.
        */}
-      <header className="shrink-0 h-12 flex items-center px-4 gap-6 bg-surface border-b border-edge z-20" aria-label="Seitennavigation">
-        {/* Brand */}
-        <NavLink
-          to="/tools"
-          className="font-serif text-sm font-semibold text-ink hover:text-brand transition-colors focus:outline-none focus:ring-2 focus:ring-brand rounded shrink-0"
-        >
-          AI Tools
-        </NavLink>
+      <header
+        className="sticky top-0 z-20 bg-surface border-b border-edge shrink-0"
+        aria-label="Seitennavigation"
+      >
+        <div className="flex items-stretch h-12 px-4">
 
-        {/* Tool-Navigation */}
-        <nav aria-label="Tool-Navigation" className="flex items-center gap-1">
-          {TOOLS.map((tool) => (
+          {/* Brand + Kontext-Label */}
+          <div className="flex items-center gap-2 shrink-0 pr-3">
             <NavLink
-              key={tool.path}
-              to={tool.path}
-              className={({ isActive }) =>
-                [
-                  'px-3 py-1.5 rounded-md text-xs font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-brand',
-                  isActive
-                    ? 'bg-brand-light text-brand'
-                    : 'text-ink-secondary hover:text-ink hover:bg-edge-2',
-                ].join(' ')
-              }
+              to="/tools"
+              className="font-serif text-sm font-semibold text-ink hover:text-brand transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-brand rounded"
             >
-              {tool.label}
+              AI Tools
             </NavLink>
-          ))}
-        </nav>
+            {activeTool && (
+              <>
+                <span className="text-ink-tertiary text-xs select-none" aria-hidden="true">›</span>
+                <span className="hidden sm:inline font-serif text-sm font-semibold text-ink truncate max-w-[180px]">
+                  {activeTool.title}
+                </span>
+              </>
+            )}
+          </div>
 
-        {/* Spacer */}
-        <div className="flex-1" />
+          {/* Divider */}
+          <div className="w-px bg-edge my-2.5 shrink-0" aria-hidden="true" />
 
-        {/* Rechte Seite: API-Key-Status + Einstellungen + Logout */}
-        <div className="flex items-center gap-1">
-          {/* API-Key-Indikator */}
-          <span
-            aria-label={apiKey ? 'Anthropic API-Key aktiv' : 'Kein API-Key konfiguriert'}
-            className={`flex items-center gap-1.5 text-xs mr-1 select-none ${apiKey ? 'text-green-700' : 'text-ink-tertiary'}`}
+          {/* Tool-Tabs — horizontally scrollable, active state: 3px bottom underline */}
+          <nav
+            ref={navRef}
+            aria-label="Tool-Navigation"
+            className="flex items-stretch flex-1 min-w-0 overflow-x-auto
+                       [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
           >
+            {TOOLS.map((tool) => {
+              const isActive = location.pathname.startsWith(tool.path);
+              return (
+                <NavLink
+                  key={tool.id}
+                  to={tool.path}
+                  aria-current={isActive ? 'page' : undefined}
+                  className={[
+                    'flex items-center gap-1.5 px-3 h-full shrink-0 text-xs border-b-2 transition-colors',
+                    'focus:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-inset',
+                    isActive
+                      ? 'border-brand text-ink font-semibold'
+                      : 'border-transparent text-ink-secondary font-medium hover:text-ink hover:border-edge',
+                  ].join(' ')}
+                >
+                  <tool.Icon className="w-3.5 h-3.5 shrink-0" />
+                  <span>{tool.navLabel}</span>
+                </NavLink>
+              );
+            })}
+          </nav>
+
+          {/* Rechte Seite: API-Key-Status + Einstellungen + Logout */}
+          <div className="flex items-center gap-1 shrink-0 pl-3">
             <span
-              className={`w-1.5 h-1.5 rounded-full shrink-0 ${apiKey ? 'bg-green-500' : 'bg-edge'}`}
-              aria-hidden="true"
-            />
-            <span className="hidden sm:inline">API</span>
-          </span>
+              aria-label={apiKey ? 'Anthropic API-Key aktiv' : 'Kein API-Key konfiguriert'}
+              className={`flex items-center gap-1.5 text-xs mr-1 select-none ${
+                apiKey ? 'text-green-700' : 'text-ink-tertiary'
+              }`}
+            >
+              <span
+                className={`w-1.5 h-1.5 rounded-full shrink-0 ${apiKey ? 'bg-green-500' : 'bg-edge'}`}
+                aria-hidden="true"
+              />
+              <span className="hidden sm:inline">API</span>
+            </span>
 
-          {/* Einstellungen */}
-          <button
-            onClick={() => setSettingsOpen(true)}
-            aria-label="API-Key-Einstellungen öffnen"
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs text-ink-secondary hover:text-ink hover:bg-edge-2 transition-colors focus:outline-none focus:ring-2 focus:ring-brand"
-          >
-            <KeyIcon />
-            <span className="hidden sm:inline">Einstellungen</span>
-          </button>
+            <button
+              onClick={() => setSettingsOpen(true)}
+              aria-label="API-Key-Einstellungen öffnen"
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs text-ink-secondary hover:text-ink hover:bg-edge-2 transition-colors focus:outline-none focus:ring-2 focus:ring-brand"
+            >
+              <KeyIcon />
+              <span className="hidden sm:inline">Einstellungen</span>
+            </button>
 
-          {/* Abmelden */}
-          <button
-            onClick={handleLogout}
-            aria-label="Abmelden"
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs text-ink-secondary hover:text-ink hover:bg-edge-2 transition-colors focus:outline-none focus:ring-2 focus:ring-brand"
-          >
-            <LogoutIcon />
-            <span className="hidden sm:inline">Abmelden</span>
-          </button>
+            <button
+              onClick={handleLogout}
+              aria-label="Abmelden"
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs text-ink-secondary hover:text-ink hover:bg-edge-2 transition-colors focus:outline-none focus:ring-2 focus:ring-brand"
+            >
+              <LogoutIcon />
+              <span className="hidden sm:inline">Abmelden</span>
+            </button>
+          </div>
         </div>
       </header>
 
