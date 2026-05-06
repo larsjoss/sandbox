@@ -1,21 +1,23 @@
 # AI Tools — Frontend (PO Suite)
 
-React 18 + TypeScript + Vite Single-Page-Application. Vier Tools: **Story Generator** (User-Stories aus Anforderungen), **Text Polisher** (Rohtexte aufbereiten), **Test Case Generator** (Testpläne aus User Stories + Screenshots) und **Doc Generator** (fachtechnische Dokumentation für Confluence). Build läuft vollständig im Browser; kein Backend ausser der Anthropic API.
+React 18 + TypeScript + Vite Single-Page-Application. Fünf Tools: **Story Generator** (User-Stories aus Anforderungen), **Goal Generator** (Sprint Goals & PI Objectives), **Text Polisher** (Rohtexte aufbereiten), **Test Case Generator** (Testpläne aus User Stories + Screenshots) und **Doc Generator** (fachtechnische Dokumentation für Confluence). Build läuft vollständig im Browser; kein Backend ausser der Anthropic API.
 
 ## Aktueller Stand
 
-**Repo:** `larsjoss/sandbox` — **Branch:** `claude/review-project-status-i1G7u`
+**Repo:** `larsjoss/sandbox` (wird zu `larsjoss/PO-Suite` umbenannt) — **Hauptbranch:** `main`
 
-**Alle vier Module vollständig implementiert und getestet.** 189 Tests grün, Build sauber.
+**Alle fünf Module vollständig implementiert und getestet.** 189 Tests grün, Build sauber.
+
+**GitHub Pages:** `https://larsjoss.github.io/PO-Suite/` — `vite.config.ts` hat `base: '/PO-Suite/'` (muss immer dem GitHub-Repo-Namen entsprechen). Deploy via GitHub Actions auf Push zu `main` oder manuell via `workflow_dispatch`.
 
 **Offene Aufgaben:**
-- Merge des Feature-Branches in `main` + GitHub Pages Deployment prüfen
-- Zusätzliche Tests: `DocGeneratorOutputPanel`, `docGenerator.ts` Service (buildUserText, Timeout)
-- Evtl. Code-Splitting (Chunk > 500 kB, Vite-Warning)
+- Code-Splitting (Chunk > 500 kB, Vite-Warning)
+- Zusätzliche Tests: `DocGeneratorOutputPanel`, `docGenerator.ts` Service
 
 **Wichtige Konventionen:**
 - Modell überall: `claude-sonnet-4-5`
-- Neues Tool anlegen: Service → Hook → Komponenten → Page → Navigation (App.tsx + TopNav + ToolSelectionPage)
+- Neues Tool anlegen: Service → Hook → Komponenten → Page → `App.tsx` Route → `constants/tools.tsx` Eintrag
+- `constants/tools.tsx` ist Single-Source-of-Truth für alle Tool-Definitionen (TopNav + ToolSelectionPage)
 - State-Machine-Pattern für neue Tools: `'input' | 'output'` wie TCG/DocGenerator
 - Pflichtfeld-Validierung: Submit-Button `disabled`, kein Toast/Alert
 - Fehlerbehandlung: `InlineError` im Formular (Input-Screen) und im Output-Panel (bei Regenerierung)
@@ -80,18 +82,24 @@ src/
 │   ├── useSessionState.ts      sessionStorage-backed useState
 │   └── useDocGenerator.ts      useGenerateDoc Mutation
 │
+├── constants/
+│   └── tools.tsx               Single-Source-of-Truth: TOOLS[], ToolDef, CATEGORY_LABELS, CATEGORY_ORDER
+│
 ├── pages/
 │   ├── AuthPage.tsx            Login-Seite → /tools
-│   ├── ToolSelectionPage.tsx   Dashboard mit Tool-Cards
+│   ├── ToolSelectionPage.tsx   Kategorie-Sektionen + TileStrips (import aus constants/tools.tsx)
 │   ├── WorkspacePage.tsx       Story Generator (3-Panel via AppShell)
 │   ├── TextPolisherPage.tsx    Text Polisher (Split-View, Use-Case-Tabs)
 │   ├── TestCaseGeneratorPage.tsx  Test Case Generator (2-Screen: Input → Output)
-│   └── DocGeneratorPage.tsx    Doc Generator (2-Screen: Input → Output)
+│   ├── DocGeneratorPage.tsx    Doc Generator (2-Screen: Input → Output)
+│   └── GoalGeneratorPage.tsx   Goal Generator (2-Screen, 2-Tab: Sprint Goal / PI Objective)
 │
 └── components/
     ├── auth/LoginForm.tsx
     ├── layout/AppShell.tsx     3-Spalten Desktop + Mobile Tabs (fade-animiert)
-    ├── layout/TopNav.tsx       Tool-Nav, API-Key-Indikator, Settings, Logout
+    ├── layout/TopNav.tsx       Sticky, Underline-Tabs + Icons, Kontext-Label, aria-current
+    ├── home/ToolTile.tsx       snap-start Tile (w-200px), hover:border-brand
+    ├── home/TileStrip.tsx      snap-x Strip, ResizeObserver, Arrow-Buttons mit Gradient-Fade
     ├── sidebar/                Sidebar, SearchBox, StoryListItem
     ├── story/                  StoryInputPanel, StoryOutputPanel, InsightsPanel
     ├── text-polisher/          TextPolisherInputPanel, TextPolisherOutputPanel,
@@ -99,8 +107,10 @@ src/
     ├── test-case-generator/    TestCaseInputPanel, TestCaseOutputPanel,
     │                           TestCaseCard, TestCaseSummaryBlock,
     │                           TestCaseFilterBar, constants.ts
-    └── doc-generator/          DocGeneratorInputPanel, DocGeneratorOutputPanel,
-                                DocModeSelector
+    ├── doc-generator/          DocGeneratorInputPanel, DocGeneratorOutputPanel,
+    │                           DocModeSelector
+    └── goal-generator/         GoalTabSelector, SprintGoalInputPanel, PiObjectiveInputPanel,
+                                GoalGeneratorOutputPanel, GoalVariantCard
 ```
 
 ## Shared Component Library
@@ -240,7 +250,7 @@ npm run test:coverage # Coverage-Report
 | `DocModeSelector.test.tsx` | Tab-Rendering, ARIA, Keyboard-Navigation (ArrowLeft/Right/Home/End) |
 | `DocGeneratorInputPanel.test.tsx` | Pflichtfelder Story/Feature, Ladezustand, Fehleranzeige, Moduswechsel |
 
-**Gesamt: 189 Tests in 14 Test-Dateien** (Stand: Phase 6 + Review-Commit)
+**Gesamt: 189 Tests in 14 Test-Dateien**
 
 ## Claude Code Konfiguration
 
